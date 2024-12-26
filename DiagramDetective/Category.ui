@@ -1,0 +1,669 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CategoryClass</class>
+ <widget class="QDialog" name="CategoryClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>527</width>
+    <height>389</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Category</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="5" column="0" colspan="4">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Description:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3">
+    <widget class="QLineEdit" name="categoryName">
+     <property name="text">
+      <string>M</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3">
+    <widget class="QComboBox" name="categoryTypes">
+     <item>
+      <property name="text">
+       <string>Monoid</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Custom Type</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Name:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="4">
+    <widget class="QTabWidget" name="propertyTabs">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="objectsTab">
+      <attribute name="title">
+       <string>Objects</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_16">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_24">
+         <property name="text">
+          <string>Object type:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="objectType">
+         <item>
+          <property name="text">
+           <string>Atomic nodes (No children)</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_25">
+         <property name="text">
+          <string>(Basic) Object labels:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QComboBox" name="objectLabels">
+         <item>
+          <property name="text">
+           <string>●</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>*</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Latin upper (with prime ticks)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Latin upper (with prime ticks) or 0</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Custom Regex</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_26">
+         <property name="text">
+          <string>Regular Expression:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QPlainTextEdit" name="objectLabelRegex">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="plainText">
+          <string>\\bullet</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="arrowsTab">
+      <attribute name="title">
+       <string>Arrows</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_17">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_29">
+         <property name="text">
+          <string>Arrow type:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="arrowType">
+         <item>
+          <property name="text">
+           <string>General morphisms</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Isomorphisms</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Set maps</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Left R-module homomorphisms</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Right R-module homomorphisms</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>General functors</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Functor isomorphisms</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_28">
+         <property name="text">
+          <string>(Basic) Object labels:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QComboBox" name="arrowLabels">
+         <item>
+          <property name="text">
+           <string>Latin lower (with prime ticks)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Latin lower (with prime ticks) or 0</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Latin upper (with prime ticks)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Latin upper (with prime ticks) or 0</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Custom Regex</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
+        <widget class="QLabel" name="label_27">
+         <property name="text">
+          <string>Regular Expression:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QPlainTextEdit" name="arrowLabelRegex">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="plainText">
+          <string>[a-z]'*</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string># of Objects/Arrows</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_6">
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="numberOfObjects">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="suffix">
+          <string/>
+         </property>
+         <property name="prefix">
+          <string/>
+         </property>
+         <property name="minimum">
+          <number>-1</number>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+         <property name="value">
+          <number>1</number>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1" colspan="2">
+        <widget class="QCheckBox" name="checkBox_3">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Is a locally small category</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSpinBox" name="numberOfArrows">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="suffix">
+          <string/>
+         </property>
+         <property name="prefix">
+          <string/>
+         </property>
+         <property name="minimum">
+          <number>-2</number>
+         </property>
+         <property name="maximum">
+          <number>999999999</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>-1</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>  (-1 = ∞)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Number of objects:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>  (-1 = ∞, -2 = it varies)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="checkBox_2">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Is a small category</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Number of arrows in Hom(A,B):</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="compositionsTab">
+      <attribute name="title">
+       <string>Compositions</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_7">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>The composition of f:X→Y and g:Y→Z is written:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEdit_5">
+         <property name="text">
+          <string>gf</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>The composition of f:X→Y and g⁻¹:Y→Z (if it exists) is written:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLineEdit" name="lineEdit_6">
+         <property name="text">
+          <string>g^{-1}f</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="identitiesTab">
+      <attribute name="title">
+       <string>Identities</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLineEdit" name="lineEdit_4">
+         <property name="text">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="2">
+        <widget class="QCheckBox" name="checkBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Each object X has an identity arrow:</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="isomorphismsTab">
+      <attribute name="title">
+       <string>Isomorphisms</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_8">
+       <item row="0" column="0" colspan="3">
+        <widget class="QCheckBox" name="checkBox_4">
+         <property name="text">
+          <string>Every arrow f is invertible</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" rowspan="2" colspan="2">
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>If it exists, f⁻¹ is written:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2" rowspan="2">
+        <widget class="QLineEdit" name="lineEdit_7">
+         <property name="text">
+          <string>f^{-1}</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="initialTerminalObjectsTab">
+      <attribute name="title">
+       <string>Initial/Terminal Objects</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_2">
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="hasZeroObject">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Has a zero object:</string>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="2">
+        <widget class="QLineEdit" name="zeroObject">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QCheckBox" name="hasInitialObject">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Has an initial object:</string>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
+        <widget class="QCheckBox" name="hasTerminalObject">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Has a terminal object:</string>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLineEdit" name="terminalObject">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>\{*\}</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLineEdit" name="initialObject">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>\varnothing</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="productsTab">
+      <attribute name="title">
+       <string>(Co)products</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="2">
+        <widget class="QLineEdit" name="binaryProduct">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>A\times B</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="hasBinaryProducts">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string>Any two objects A,B have a binary product:</string>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="nameParametersTab">
+      <attribute name="title">
+       <string>Name Parameters</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Parameter(s):</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="nameParametersCSV">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="placeholderText">
+          <string>A comma-separated list of typed parameters such as R:Ring</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QLineEdit" name="lineEdit_3">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>A monoid is a category with one object.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_30">
+     <property name="text">
+      <string>Validation:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1" colspan="3">
+    <widget class="QLabel" name="label_31">
+     <property name="styleSheet">
+      <string notr="true">color:rgb(51,51,255)</string>
+     </property>
+     <property name="text">
+      <string>Everything looks logically consistent.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="3">
+    <widget class="QLabel" name="label_9">
+     <property name="text">
+      <string>Types:</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>categoryTypes</tabstop>
+  <tabstop>categoryName</tabstop>
+  <tabstop>lineEdit_3</tabstop>
+  <tabstop>propertyTabs</tabstop>
+  <tabstop>objectType</tabstop>
+  <tabstop>objectLabels</tabstop>
+  <tabstop>objectLabelRegex</tabstop>
+  <tabstop>arrowType</tabstop>
+  <tabstop>arrowLabels</tabstop>
+  <tabstop>arrowLabelRegex</tabstop>
+  <tabstop>numberOfObjects</tabstop>
+  <tabstop>numberOfArrows</tabstop>
+  <tabstop>checkBox_2</tabstop>
+  <tabstop>checkBox_3</tabstop>
+  <tabstop>lineEdit_5</tabstop>
+  <tabstop>lineEdit_6</tabstop>
+  <tabstop>checkBox</tabstop>
+  <tabstop>lineEdit_4</tabstop>
+  <tabstop>checkBox_4</tabstop>
+  <tabstop>lineEdit_7</tabstop>
+  <tabstop>hasZeroObject</tabstop>
+  <tabstop>zeroObject</tabstop>
+  <tabstop>hasInitialObject</tabstop>
+  <tabstop>initialObject</tabstop>
+  <tabstop>hasTerminalObject</tabstop>
+  <tabstop>terminalObject</tabstop>
+  <tabstop>hasBinaryProducts</tabstop>
+  <tabstop>binaryProduct</tabstop>
+  <tabstop>nameParametersCSV</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
