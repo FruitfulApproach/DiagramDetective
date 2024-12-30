@@ -1,54 +1,33 @@
+#include "Semicategory.h"
 #pragma once
 
-#include "Object.h"
-#include "Arrow.h"
-
-class Semicategory  : public Object
+Base* Semicategory::deepcopy(std::map<const Base*, Base*> memo) const
 {
-	Q_OBJECT
+	if (memo.contains(this))
+		return memo[this];
 
-public:
-	Semicategory(Label* name, const QString& composition, QGraphicsItem *parent=nullptr);
+	auto S = new Semicategory(
+		objectType->deepcopy(memo),
+		dynamic_cast<Functor*>(arrowType->deepcopy(memo)), composition);
 
-	Semicategory(const Semicategory& source)
-		: Object(source)
-	{ 
-		o = source.o;
-		this->objectLabel = new Label(*source.objectLabel);
-		this->arrowLabel = new Label(*source.arrowLabel);
-		this->objectSource = qgraphicsitem_cast<Object*>(source.objectSource->copy());
-		this->arrowSource = qgraphicsitem_cast<Arrow*>(source.arrowSource->copy());
-	}
+	memo[this] = S;
 
-	~Semicategory();
-
-	void setArrowCopySource(Arrow* source)
+	for (auto [name, list] : someObjects)
 	{
-		arrowSource = source;
+		for (const auto* X : list)
+		{
+			S->someObjects[name].push_back(X->deepcopy(memo));
+		}
 	}
 
-	void setObjectCopySource(Object* source)
+	for (auto [name, list] : someArrows)
 	{
-		objectSource = source;
-	}
-	
-	Object* createObject()
-	{
-		objectSource = qgraphicsitem_cast<Object*>(objectSource->copy());
-		//objectLabel->setParentItem(objectSource);
-		return objectSource;
+		for (const auto* f : list)
+		{
+			S->someObjects[name].push_back(f->deepcopy(memo));
+		}
 	}
 
-	Arrow* createArrow()
-	{
-		arrowSource = qgraphicsitem_cast<Arrow*>(arrowSource->copy());
-		return arrowSource;
-	}
+	return S;
+}
 
-private:
-	QString o;  // Guess
-	Label* objectLabel = nullptr;
-	Label* arrowLabel = nullptr;
-	Object* objectSource = nullptr;
-	Arrow* arrowSource = nullptr;
-};
