@@ -2,11 +2,14 @@ from gfx.base import Base
 from PyQt5.QtCore import pyqtSignal, QPointF, QRectF, Qt
 from PyQt5.QtGui import QPen, QBrush, QColor
 from gfx.utility import filter_out_gfx_descendents
+from gfx.connect_button import ConnectButton
 
 from copy import copy
 
 class Node(Base):
-    bounding_rect_pad = 1  # BUGFIX: needed to remove drag artifacts when zoomed in
+    bounding_rect_pad = 10  # BUGFIX: needed to remove drag artifacts when zoomed in; also room for the connect button to display without chopping
+    children_rect_pad = 5  # So there's some area to click inside of
+    boundary_proximity_distance = 5
     
     position_changed = pyqtSignal(QPointF)   # Sends delta
         
@@ -15,11 +18,15 @@ class Node(Base):
         
         self._lastPos = self.pos()
         self._collisionMemo = set()
+        self._connectButton = ConnectButton()
+        self._connectButton.visible = False
         
         self.setFlags(
             self.ItemSendsScenePositionChanges|self.ItemSendsGeometryChanges|
             self.ItemIsMovable|self.ItemIsFocusable|self.ItemIsSelectable
         )
+        
+        self.setAcceptHoverEvents(True)                
         
         if not pickled:
             self._pen = QPen(Qt.blue, 2.0)
@@ -82,6 +89,9 @@ class Node(Base):
         painter.setPen(self.border_pen)
         painter.drawRect(self.childrenBoundingRect())
         
+        if self._connectButton.visible:
+            self._connectButton.paint(painter)            
+        
     def __repr__(self):
         return f'{self.label}:Node(@{id(self)}'
     
@@ -135,3 +145,35 @@ class Node(Base):
         rect = self.boundingRect()
         pos -= rect.center()
         self.setPos(pos)
+        
+    def childrenBoundingRect(self) -> QRectF:
+        r = super().childrenBoundingRect()
+        p = self.children_rect_pad
+        return r.adjusted(-p, -p, p, p)
+    
+    def hoverMoveEvent(self, event):
+        p = self.boundary_proximity_distance
+        r = self.childrenBoundingRect()
+        r_outer = r.adjusted(-p, -p, p, p)
+        r_inner = r.adjusted(p, p, -p, -p)
+        
+        if r_outer.contains(event.pos()):
+            if not r_inner.contains(event.pos()):
+                self._connectButton.pos = event.pos()
+                if not self._connectButton.visible:
+                    self._connectButton.visible = True
+            else:
+                self._connectButton.visible = False
+        else:
+            self._connectButton.visible = False
+            
+        self.update()    
+            
+        super().hoverMoveEvent(event)
+        
+    def hoverLeaveEvent(self, event):
+        self._connectButton.visible = False
+        super().hoverLeaveEvent(event)
+        
+    def mousePressEvent(self, event):
+        self._connectButton.visible = False
