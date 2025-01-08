@@ -1,15 +1,16 @@
 from gfx.base import Base
 from PyQt5.QtCore import pyqtSignal, QPointF, QRectF, Qt
-from PyQt5.QtGui import QPen, QBrush, QColor
+from PyQt5.QtGui import QPen, QBrush, QColor, QPainterPath
 from gfx.utility import filter_out_gfx_descendents
 from gfx.connect_button import ConnectButton
-
 from copy import copy
+from core.utility import simple_max_contrasting_color
 
 class Node(Base):
-    bounding_rect_pad = 10  # BUGFIX: needed to remove drag artifacts when zoomed in; also room for the connect button to display without chopping
-    children_rect_pad = 5  # So there's some area to click inside of
+    bounding_rect_pad = -1  # BUGFIX: needs to be -1 or else boundingRect always gets rendered for some reason (Qt bug)
+    children_rect_pad = 7  # So there's some area to click inside of
     boundary_proximity_distance = 5
+    selection_shape_pad = 3
     
     position_changed = pyqtSignal(QPointF)   # Sends delta
         
@@ -30,7 +31,7 @@ class Node(Base):
         
         if not pickled:
             self._pen = QPen(Qt.blue, 2.0)
-            self._brush = QBrush(Qt.yellow)
+            self._brush = QBrush(Qt.white)
             self.finish_setup()
             
     def __setstate__(self, data):
@@ -83,14 +84,27 @@ class Node(Base):
         p = self.bounding_rect_pad
         return self.childrenBoundingRect().adjusted(-p, -p, p, p)
     
+    def _selectionShape(self):
+        p = self.selection_shape_pad
+        r = self.childrenBoundingRect().adjusted(-p, -p, p, p)
+        shape = QPainterPath()
+        shape.addRect(r)
+        return shape
+    
     def paint(self, painter, option, widget):
         painter.setRenderHint(painter.Antialiasing)
         painter.setBrush(self.fill_brush)
         painter.setPen(self.border_pen)
         painter.drawRect(self.childrenBoundingRect())
         
+        if self.isSelected() and self.scene():
+            shape = self._selectionShape()
+            bgcolor = self.scene().backgroundBrush().color()
+            col = simple_max_contrasting_color(bgcolor)
+            painter.strokePath(shape, QPen(col, 1.0, Qt.DotLine))
+            
         if self._connectButton.visible:
-            self._connectButton.paint(painter)            
+            self._connectButton.paint(painter)
         
     def __repr__(self):
         return f'{self.label}:Node(@{id(self)}'
@@ -166,14 +180,23 @@ class Node(Base):
                 self._connectButton.visible = False
         else:
             self._connectButton.visible = False
+        
+        if self._connectButton.visible:
+            self.setCursor(Qt.UpArrowCursor)
+        else:
+            self.setCursor(Qt.ArrowCursor)
             
-        self.update()    
-            
+        self.update()                
         super().hoverMoveEvent(event)
         
     def hoverLeaveEvent(self, event):
         self._connectButton.visible = False
+        self.setCursor(Qt.ArrowCursor)
         super().hoverLeaveEvent(event)
         
     def mousePressEvent(self, event):
         self._connectButton.visible = False
+        
+    def focusOutEvent(self, event):
+        self.setSelected(False)
+        super().focusOutEvent(event)

@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QGraphicsScene
 import mathlib.builtins as builtin
 from PyQt5.QtCore import QPointF, Qt
-from PyQt5.QtGui import QTransform, QFont, QBrush
+from PyQt5.QtGui import QTransform, QFont, QBrush, QColor
 from gfx.directed_graph import DirectedGraph
 from gfx.label import Label
 
@@ -10,7 +10,7 @@ class Scene(QGraphicsScene):
         super().__init__()
         
         # TODO
-        self.setBackgroundBrush(QBrush(Qt.lightGray))
+        self.setBackgroundBrush(QBrush(QColor(200, 200, 50)))
         
         if not pickled:
             self._ambientSpace = builtin.Semicategories
@@ -55,3 +55,11 @@ class Scene(QGraphicsScene):
             
         X = S(dbg_label)
         X.set_center_pos(pos)
+    
+    def mousePressEvent(self, event):
+        item = self.itemAt(event.scenePos(), QTransform())
+        if item is None:
+            for item in self.items():
+                item.setSelected(False)
+            self.update()
+        super().mousePressEvent(event)
