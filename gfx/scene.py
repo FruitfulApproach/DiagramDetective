@@ -11,6 +11,7 @@ class Scene(QGraphicsScene):
         
         # TODO
         self.setBackgroundBrush(QBrush(QColor(200, 200, 50)))
+        self._mousePressed = False
         
         if not pickled:
             self._ambientSpace = builtin.Semicategories
@@ -57,9 +58,22 @@ class Scene(QGraphicsScene):
         X.set_center_pos(pos)
     
     def mousePressEvent(self, event):
+        self._mousePressed = True
         item = self.itemAt(event.scenePos(), QTransform())
         if item is None:
             for item in self.items():
                 item.setSelected(False)
             self.update()
         super().mousePressEvent(event)
+        
+    def mouseReleaseEvent(self, event):
+        self._mousePressed = False
+        self.update()                           # BUGFIX: selection rubber band artifacts
+        super().mouseReleaseEvent(event)
+        
+    def mouseMoveEvent(self, event):
+        if self._mousePressed:
+            self.update()                       # BUGFIX: selection rubber band artifacts
+        super().mouseMoveEvent(event)       
+        
+        

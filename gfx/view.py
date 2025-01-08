@@ -7,7 +7,10 @@ class View(QGraphicsView):
         self._scale = (1.0, 1.0)                    
         #self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setFocusPolicy(Qt.StrongFocus)
-        self.setMouseTracking(True)        
+        self.setMouseTracking(True)
+        self.setRubberBandSelectionMode(Qt.ContainsItemBoundingRect)
+        self.setDragMode(self.RubberBandDrag)
+        
         if not pickled:
             self._wheelZoom = True
             self._zoomFactor = (1.1, 1.1)
