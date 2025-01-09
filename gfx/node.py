@@ -5,14 +5,18 @@ from gfx.utility import filter_out_gfx_descendents
 from gfx.connect_button import ConnectButton
 from copy import copy
 from core.utility import simple_max_contrasting_color
+from core.qt_pickle_utility import SimpleBrush, Pen
 
 class Node(Base):
-    bounding_rect_pad = -1  # BUGFIX: needs to be -1 or else boundingRect always gets rendered for some reason (Qt bug)
-    children_rect_pad = 7  # So there's some area to click inside of
-    boundary_proximity_distance = 5
-    selection_shape_pad = 3
-    
+    bounding_rect_pad = 10  # BUGFIX: needs to be -1 or else boundingRect always gets rendered for some reason (Qt bug)
+    children_rect_pad = 8  # So there's some area to click inside of
+    boundary_proximity_distance = 6
+    selection_shape_pad = 3    
     position_changed = pyqtSignal(QPointF)   # Sends delta
+    
+    default_border_pen = Pen(QColor(51, 180, 255), 3.0)
+    default_fill_brush = QBrush(SimpleBrush(QColor(180, 255, 51)))
+    default_corner_radius = 11.0
         
     def __init__(self, label: str=None, pickled=False):
         super().__init__(label)
@@ -30,8 +34,9 @@ class Node(Base):
         self.setAcceptHoverEvents(True)                
         
         if not pickled:
-            self._pen = QPen(Qt.blue, 2.0)
-            self._brush = QBrush(Qt.white)
+            self._pen = self.default_border_pen
+            self._brush = self.default_fill_brush
+            self._cornerRadius = self.default_corner_radius
             self.finish_setup()
             
     def __setstate__(self, data):
@@ -43,6 +48,15 @@ class Node(Base):
         super()._setstate(data)
         self._pen = data['pen']
         self._brush = data['brush']
+        
+    @property
+    def corner_radius(self):
+        return self._cornerRadius
+    
+    @corner_radius.setter
+    def corner_radius(self, radius: float):
+        self._cornerRadius = radius
+        self.update()
     
     @property
     def border_pen(self):
@@ -95,7 +109,8 @@ class Node(Base):
         painter.setRenderHint(painter.Antialiasing)
         painter.setBrush(self.fill_brush)
         painter.setPen(self.border_pen)
-        painter.drawRect(self.childrenBoundingRect())
+        r = self.corner_radius
+        painter.drawRoundedRect(self.childrenBoundingRect(), r, r)
         
         if self.isSelected() and self.scene():
             shape = self._selectionShape()
@@ -186,17 +201,29 @@ class Node(Base):
         else:
             self.setCursor(Qt.ArrowCursor)
             
-        self.update()                
+        self.update()                         
         super().hoverMoveEvent(event)
         
     def hoverLeaveEvent(self, event):
         self._connectButton.visible = False
         self.setCursor(Qt.ArrowCursor)
+        self.update()
         super().hoverLeaveEvent(event)
         
     def mousePressEvent(self, event):
         self._connectButton.visible = False
+        super().mousePressEvent(event)
         
     def focusOutEvent(self, event):
         self.setSelected(False)
         super().focusOutEvent(event)
+        
+    def connect_button_rect(self):
+        return self._connectButton.rect
+    
+    def in_arrow_connect_mode(self):
+        return self._connectButton.visible
+    
+    def mouseMoveEvent(self, event):
+        self.scene().update()
+        super().mouseMoveEvent(event)

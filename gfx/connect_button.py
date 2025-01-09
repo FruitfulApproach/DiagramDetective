@@ -3,8 +3,8 @@ from PyQt5.QtGui import QColor, QBrush, QPen
 
 class ConnectButton:
     default_radius = 7
-    default_fill_brush = QBrush(Qt.cyan)
-    default_border_pen = QPen(Qt.cyan, 0.0)
+    default_fill_brush = QBrush(Qt.white)
+    default_border_pen = QPen(QColor(0, 170, 255), 1.5)
     
     def __init__(self, radius=None, pickled=False):
         if radius is None:

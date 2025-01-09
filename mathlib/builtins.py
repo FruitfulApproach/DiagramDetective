@@ -3,8 +3,8 @@ from mathlib.object import Object
 from mathlib.morphism import Morphism
 
 def initialize_builtins():
-    global Semicategories
-    Semicategories = Semicategory("𝐒𝐞𝐦𝐢𝐜𝐚𝐭𝐞𝐠𝐨𝐫𝐢𝐞𝐬", objects=Semicategory("S", objects=Object("X"), morphisms=Morphism("f")))
+    global BigCat
+    BigCat = Semicategory("𝐁𝐢𝐠𝐂𝐚𝐭", objects=Semicategory("𝓒", objects=Object("A"), morphisms=Morphism("a")))
 
 
-Semicategories = None
+BigCat = None

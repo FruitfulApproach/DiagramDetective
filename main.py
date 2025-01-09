@@ -15,8 +15,5 @@ if __name__ == '__main__':
     window.setCentralWidget(view)
     scene = Scene()
     view.setScene(scene)
-    
-    scene.addItem(Object("S:𝙎𝒆𝒕"))
-    
     window.show()
     sys.exit(app.exec_())

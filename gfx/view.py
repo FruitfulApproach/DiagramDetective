@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QGraphicsView
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
+from PyQt5.QtCore import Qt, QRectF
 
 class View(QGraphicsView):
     def __init__(self, pickled=False):
