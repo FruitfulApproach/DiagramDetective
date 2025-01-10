@@ -2,6 +2,8 @@ from mathlib.object import Object
 from mathlib.morphism import Morphism
 from gfx.directed_graph import DirectedGraph
 from copy import copy
+from gfx.arrow import Arrow
+from gfx.node import Node
 
 class Semicategory(DirectedGraph):
     def __init__(self, label=None, objects: Object = None, morphisms: Morphism = None, pickled=False):
@@ -38,8 +40,20 @@ class Semicategory(DirectedGraph):
     
     @property
     def morphism_type(self):
-        return self.node_type
+        return self.arrow_type
     
     @property
     def object_type(self):
         return self.node_type
+    
+    def _arrowCantConnect(self, arrow: Arrow, node: Node, other_end: Node):
+        if not isinstance(arrow, self.arrow_type.__class__):
+            return True
+        if not isinstance(node, self.node_type.__class__):
+            return True
+        if not isinstance(other_end, self.node_type.__class__):
+            return True
+        if other_end.category is not node.category:
+            return True
+        return super()._arrowCantConnect(arrow, node, other_end)       
+        

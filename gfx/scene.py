@@ -6,6 +6,7 @@ from gfx.directed_graph import DirectedGraph
 from gfx.label import Label
 from gfx.node import Node
 from core.qt_pickle_utility import SimpleBrush
+from gfx.arrow import Arrow
 
 class Scene(QGraphicsScene):
     def __init__(self, pickled=False):
@@ -14,6 +15,7 @@ class Scene(QGraphicsScene):
         # TODO
         self.setBackgroundBrush(SimpleBrush(QColor(255, 250, 115)))
         self._mousePressed = False
+        self._placingArrow = None
         
         if not pickled:
             C = self._ambientSpace = builtin.BigCat
@@ -45,6 +47,11 @@ class Scene(QGraphicsScene):
         painter.drawText(QPointF(), self.ambient_space.label)
         
     def mouseDoubleClickEvent(self, event):
+        if self._placingArrow:
+            a = self._placingArrow
+            self._placingArrow = None            
+            del a
+            
         item = self.itemAt(event.scenePos(), QTransform())
         
         if item is None:
@@ -80,16 +87,69 @@ class Scene(QGraphicsScene):
             for item in self.items():    
                 item.setSelected(False)             # BUGFIX: items were not automatically deselected already... o_o
             self.update()
+        else:
+            if isinstance(item, Node):
+                r = item.connect_button_rect()
+                p = item.mapFromScene(event.scenePos())
+                
+                if r.contains(p) and item.in_arrow_connect_mode:
+                    X = item
+                    C = item.parentItem()
+                    
+                    if C is None:
+                        C = self.ambient_space
+                    
+                    a = C("a", X, None)
+                    pos = a.mapFromScene(event.scenePos())
+                    a.source_point.setPos(pos)
+                    a.target_point.setPos(pos)
+                    self._placingArrow = a
+                    event.accept()
+                    
         super().mousePressEvent(event)
+        
+    def mouseMoveEvent(self, event):
+        if self._placingArrow:
+            a = self._placingArrow
+            pos = a.mapFromScene(event.scenePos())
+            a.target_point.setPos(pos)
+            a.update()
+        else:
+            if self._mousePressed:
+                self.update()                        
+            
+            super().mouseMoveEvent(event)
         
     def mouseReleaseEvent(self, event):
         self._mousePressed = False
+        
+        if self._placingArrow:
+            a = self._placingArrow                
+            self._placingArrow = None
+            
+            items = self.items(event.scenePos())
+            
+            for item in items:                
+                if item not in (a, a.target_point, a.source_point):
+                    while (not isinstance(item, Node)) or self.arrow_cant_connect_target(a, item):
+                        item = item.parentItem()
+                        
+                        if item is None:
+                            break
+        
+            if item is None:
+                a.delete()
+            else:
+                if isinstance(item, Node) and not self.arrow_cant_connect_target(a, item):
+                    a.target = item
+                else:
+                    a.delete()
+                
         self.update()                           # BUGFIX: selection rubber band artifacts
         super().mouseReleaseEvent(event)
         
-    def mouseMoveEvent(self, event):
-        if self._mousePressed:
-            self.update()                       # BUGFIX: selection rubber band artifacts
-        super().mouseMoveEvent(event)       
+    def arrow_cant_connect_target(self, arrow: Arrow, node: Node) -> bool:
+        space = arrow.parent_graph
+        return space.arrow_cant_connect_target(arrow, node)
         
         

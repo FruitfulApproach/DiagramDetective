@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QGraphicsObject
 from gfx.label import Label
 from copy import copy
+from PyQt5.QtCore import QRectF
 
 class Base(QGraphicsObject):
     def __init__(self, label: str = None, pickled=False):
@@ -8,7 +9,7 @@ class Base(QGraphicsObject):
         
         if not pickled:
             self._label = Label(label)
-            self.finish_setup()
+            Base.finish_setup(self)
             
     def __setstate__(self, data):
         self.__init__(pickled=True)
@@ -29,7 +30,7 @@ class Base(QGraphicsObject):
     def finish_setup(self):
         self._label.setParentItem(self)
         
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: dict):
         if id(self) not in memo:
             n = copy(self)
             memo[id(self)] = n
@@ -60,3 +61,22 @@ class Base(QGraphicsObject):
         
     def __repr__(self):
         return f'{self.text}:Base(@{id(self)}'
+    
+    @property
+    def parent_graph(self):
+        parent = self.parentItem()        
+        if parent is None:
+            return self.scene().ambient_space        
+        return parent
+    
+    def update(self, rect: QRectF = None, memo: set = None):
+        if memo is None:
+            memo = set()
+        if id(self) not in memo:
+            memo.add(id(self))
+            self._update(rect, memo)    
+        if rect is None:
+            QGraphicsObject.update(self)
+        else:
+            QGraphicsObject.update(self, rect)            
+    

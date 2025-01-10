@@ -1,4 +1,6 @@
 from gfx.node import Node
 
 class Object(Node):
-    pass
+    @property
+    def category(self):
+        return self.parent_graph

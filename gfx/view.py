@@ -75,4 +75,3 @@ class View(QGraphicsView):
             elif event.key() == Qt.Key_Minus:
                 self.zoom_out()
         super().keyPressEvent(event)
-                

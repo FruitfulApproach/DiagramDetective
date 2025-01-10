@@ -1,14 +1,14 @@
 from gfx.base import Base
 from PyQt5.QtCore import pyqtSignal, QPointF, QRectF, Qt
-from PyQt5.QtGui import QPen, QBrush, QColor, QPainterPath
+from PyQt5.QtGui import QPen, QBrush, QColor, QPainterPath, QVector2D
 from gfx.utility import filter_out_gfx_descendents
 from gfx.connect_button import ConnectButton
 from copy import copy
-from core.utility import simple_max_contrasting_color
+from core.utility import simple_max_contrasting_color, closest_point_on_path
 from core.qt_pickle_utility import SimpleBrush, Pen
 
 class Node(Base):
-    bounding_rect_pad = 10  # BUGFIX: needs to be -1 or else boundingRect always gets rendered for some reason (Qt bug)
+    bounding_rect_pad = 12  # BUGFIX: needs to be -1 or else boundingRect always gets rendered for some reason (Qt bug)
     children_rect_pad = 8  # So there's some area to click inside of
     boundary_proximity_distance = 6
     selection_shape_pad = 3    
@@ -165,7 +165,9 @@ class Node(Base):
                 self.handle_collisions(delta_pos=value - self.pos())
             
         if change == self.ItemPositionHasChanged:
-            self._clearCollisionMemos()
+            self._clearCollisionMemos()            
+            space = self.parent_graph
+            space.update_connecting_arrows(self, set())                        
             self.scene().update()
             
         return super().itemChange(change, value)
@@ -225,5 +227,62 @@ class Node(Base):
         return self._connectButton.visible
     
     def mouseMoveEvent(self, event):
+        space = self.parent_graph
+        #space.update_connecting_arrows(self, set())                        
         self.scene().update()
         super().mouseMoveEvent(event)
+
+    def closest_boundary_pos_to_item(self, item):
+        shape = self.shape()
+        item_shape = item.shape()
+        if shape and item_shape:
+            r0 = shape.boundingRect()
+            r1 = self.mapFromItem(item, item_shape.boundingRect()).boundingRect()
+
+            horiz = (max(r0.left(), r1.left()), min(r0.right(), r1.right()))
+            vert = (max(r0.top(), r1.top()), min(r0.bottom(), r1.bottom()))
+
+            dx = horiz[1] - horiz[0]
+            dy = vert[1] - vert[0]
+
+            c0 = r0.center()
+            c1 = r1.center()
+
+            if dx > 0 or dy > 0:
+                if dx > dy:     # Shared horizontal interval is more prominent
+                    if r1.left() > r0.left():
+                        x = r1.left() + dx/2.0
+                    else:
+                        x = r0.left() + dx/2.0
+                    if c0.y() < c1.y():
+                        y = r0.bottom()
+                    else:
+                        y = r0.top()
+                else:       # Shared vertical interval is more prominent
+                    if r1.top() > r0.top():
+                        y = r1.top() + dy/2.0
+                    else:
+                        y = r0.top() + dy/2.0
+                    if c0.x() < c1.x():
+                        x = r0.right()
+                    else:
+                        x = r0.left()
+                return QPointF(x, y)
+
+            return closest_point_on_path(self.mapFromItem(item, item.boundingRect().center()), shape)
+    
+    def shape(self):
+        path = QPainterPath()
+        rect = self.childrenBoundingRect()
+        r = self.corner_radius
+        path.addRoundedRect(rect, r, r)
+        return path
+
+    def _update(self, rect:QRectF, memo: set):
+        space = self.parent_graph
+        space.update_connecting_arrows(self, memo)
+            
+    def setPos(self, pos: QPointF):
+        super().setPos(pos)
+        self.update()
+            
