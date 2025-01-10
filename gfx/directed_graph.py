@@ -1,7 +1,6 @@
 from gfx.arrow import Arrow
 from gfx.node import Node
 from mathlib.object import Object
-from copy import copy
 
 class DirectedGraph(Object):
     def __init__(self, label: str = None, node_type: Node = None, arrow_type: Arrow = None, pickled=False):
@@ -62,12 +61,12 @@ class DirectedGraph(Object):
     
     def __call__(self, label: str, source: Node=None, target: Node=None):
         if target is None and source is None:
-            n = copy(self._nodeType)
+            n = self._nodeType.copy()
             n.label = label
             self._addNode(n)
             return n
         else:
-            a = copy(self._arrowType)
+            a = self._arrowType.copy()
             self._addArrow(a)
             a.label = label
             a.source = source
@@ -129,11 +128,8 @@ class DirectedGraph(Object):
     def _arrowCantConnect(self, arrow, node, other_end):            
         if other_end is None:
             return False
-        parent = other_end.parent_graph        
-        while parent is not None:
-            if parent.isAncestorOf(node):
-                return True
-            parent = parent.parentItem()
+        if node.isAncestorOf(arrow):
+            return True
         return False
 
             

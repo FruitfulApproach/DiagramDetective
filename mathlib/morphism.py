@@ -9,7 +9,7 @@ class Morphism(Arrow):
     def category(self):
         return self.parent_graph
     
-    def __copy__(self):
+    def copy(self):
         f = Morphism(label=self.label, dom=self.dom, cod=self.cod)
         return f
     

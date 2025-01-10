@@ -3,19 +3,18 @@ from PyQt5.QtCore import pyqtSignal, QPointF, QRectF, Qt
 from PyQt5.QtGui import QPen, QBrush, QColor, QPainterPath, QVector2D
 from gfx.utility import filter_out_gfx_descendents
 from gfx.connect_button import ConnectButton
-from copy import copy
 from core.utility import simple_max_contrasting_color, closest_point_on_path
 from core.qt_pickle_utility import SimpleBrush, Pen
 
 class Node(Base):
-    bounding_rect_pad = 12  # BUGFIX: needs to be -1 or else boundingRect always gets rendered for some reason (Qt bug)
-    children_rect_pad = 8  # So there's some area to click inside of
-    boundary_proximity_distance = 6
-    selection_shape_pad = 3    
+    bounding_rect_pad = 22  # BUGFIX: needs to be -1 or else boundingRect always gets rendered for some reason (Qt bug)
+    children_rect_pad = 16  # So there's some area to click inside of
+    boundary_proximity_distance = 12
+    selection_shape_pad = 5    
     position_changed = pyqtSignal(QPointF)   # Sends delta
     
     default_border_pen = Pen(QColor(51, 180, 255), 3.0)
-    default_fill_brush = QBrush(SimpleBrush(QColor(180, 255, 51)))
+    default_fill_brush = QBrush(SimpleBrush(Qt.yellow))
     default_corner_radius = 11.0
         
     def __init__(self, label: str=None, pickled=False):
@@ -86,11 +85,11 @@ class Node(Base):
         
     def __deepcopy__(self, memo):
         if id(self) not in memo:
-            X = copy(self)
+            X = self.copy()
             memo[id(self)] = X
         return memo[id(self)]
     
-    def __copy__(self):
+    def copy(self):
         X = Node(label=self.label)
         return X
         
@@ -111,18 +110,14 @@ class Node(Base):
         painter.setPen(self.border_pen)
         r = self.corner_radius
         painter.drawRoundedRect(self.childrenBoundingRect(), r, r)
-        
-        if self.isSelected() and self.scene():
-            shape = self._selectionShape()
-            bgcolor = self.scene().backgroundBrush().color()
-            col = simple_max_contrasting_color(bgcolor)
-            painter.strokePath(shape, QPen(col, 1.0, Qt.DotLine))
-            
+                    
         if self._connectButton.visible:
             self._connectButton.paint(painter)
+
+        super().paint(painter, option, widget)            
         
     def __repr__(self):
-        return f'{self.label}:Node(@{id(self)}'
+        return f'{self.label}:Node(@{id(self)})'
     
     def mouseMoveEvent(self, event):
         self.handle_collisions(event.pos() - event.lastPos())
@@ -285,4 +280,6 @@ class Node(Base):
     def setPos(self, pos: QPointF):
         super().setPos(pos)
         self.update()
+
+        
             

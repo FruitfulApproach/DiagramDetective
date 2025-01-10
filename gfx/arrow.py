@@ -1,11 +1,11 @@
 from gfx.base import Base
 from gfx.node import Node
-from copy import copy, deepcopy
-from PyQt5.QtCore import QPointF, QLineF
-from PyQt5.QtGui import QPainterPath, QVector2D
+from copy import deepcopy
+from PyQt5.QtCore import QPointF, QLineF, Qt, QRectF
+from PyQt5.QtGui import QPainterPath, QVector2D, QPainterPathStroker
 from gfx.control_point import ControlPoint
 from core.qt_pickle_utility import Pen
-from PyQt5.QtCore import Qt, QRectF
+from PyQt5.QtWidgets import QMenu
 from gfx.label import Label
 
 class Arrow(Base):
@@ -17,6 +17,10 @@ class Arrow(Base):
         self._target = target        
         self._updatingPointPos = False
         self._lastLabelPosLine = None
+        self._shape = QPainterPath()
+        
+        self.setFlags(self.ItemIsSelectable | self.ItemIsFocusable)
+        self.setAcceptHoverEvents(True)
         
         if not pickled:
             self._linePen = Pen(Qt.black, 3.0)
@@ -24,8 +28,8 @@ class Arrow(Base):
             self._relativeHeadSize = self.default_relative_head_size
             self._points = [ControlPoint() for i in range(0, 4)]
             self._bezier = None
-            self._points[1].setVisible(False)
-            self._points[2].setVisible(False)            
+            for point in self._points:
+                point.setVisible(False)
             Arrow.finish_setup(self)
             
     def __setstate__(self, data):
@@ -43,17 +47,18 @@ class Arrow(Base):
     def finish_setup(self):
         for point in self._points:
             point.setParentItem(self)
+        self.update_shape()
         
     def __deepcopy__(self, memo):
         if id(self) not in memo:
-            f = copy(self)
+            f = self.copy()
             f.source = deepcopy(self.source, memo)
             f.target = deepcopy(self.target, memo)
             memo[id(self)] = f
             return f
         return memo[id(self)]
     
-    def __copy__(self):
+    def copy(self):
         f = Arrow(label=self.label, source=self.source, target=self.target)
         return f
     
@@ -156,7 +161,7 @@ class Arrow(Base):
     def num_heads(self):
         return self._headStyle  # yes, this is right, check the enum
     
-    def line(self):
+    def line(self) -> QLineF:
         return QLineF(self._points[0].pos(), self._points[-1].pos())
     
     @property
@@ -241,8 +246,8 @@ class Arrow(Base):
         painter.setRenderHint(painter.Antialiasing)
         line = self.line()
         painter.setPen(self.pen)
-        painter.drawLine(line)
-        print("PAINTING")
+        painter.drawLine(line)        
+        super().paint(painter, option, widget)
 
     @property
     def source_or_point(self):
@@ -267,11 +272,7 @@ class Arrow(Base):
     def _update(self, rect: QRectF, memo: set):
         self.prepareGeometryChange()
         self.update_control_point_positions()
-        ancestor = self.parentItem()
-        while ancestor is not None:
-            ancestor.update(rect, memo)
-            ancestor = ancestor.parentItem()
-            
+        self.update_shape()
                 
     def delete(self):
         self.space.delete_arrow(self) 
@@ -279,3 +280,38 @@ class Arrow(Base):
         self.target = None
         self.deleteLater()
         
+    def update_shape(self):
+        path = QPainterPath()
+        line = self.line()
+        path.moveTo(line.p1())
+        path.lineTo(line.p2())
+        stroker = QPainterPathStroker()
+        stroker.setCapStyle(Qt.RoundCap)
+        stroker.setJoinStyle(Qt.RoundJoin)
+        stroker.setWidth(4*self.pen.widthF())
+        self._shape = stroker.createStroke(path)
+                
+    def shape(self):
+        return self._shape    
+    
+    def _selectionShape(self):
+        return self.shape()
+    
+    def hoverEnterEvent(self, event):
+        if self.is_bezier:
+            for point in self._points:
+                point.setVisible(True)  
+        super().hoverEnterEvent(event)
+        
+    def hoverLeaveEvent(self, event):
+        for point in self._points:
+            point.setVisible(False)
+        super().hoverLeaveEvent(event)
+        
+    def contextMenuEvent(self, event):
+        menu = QMenu()
+        menu.addAction(f"Delete arrow {self.label}").triggered.connect(self.delete)
+        
+        menu.exec_(event.screenPos())
+        
+            

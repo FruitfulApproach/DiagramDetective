@@ -1,7 +1,6 @@
 from mathlib.object import Object
 from mathlib.morphism import Morphism
 from gfx.directed_graph import DirectedGraph
-from copy import copy
 from gfx.arrow import Arrow
 from gfx.node import Node
 
@@ -30,11 +29,11 @@ class Semicategory(DirectedGraph):
         
     def __deepcopy__(self, memo):
         if id(self) not in memo:
-            X = copy(self)
+            X = self.copy()
             memo[id(self)] = X
         return memo[id(self)]
     
-    def __copy__(self):
+    def copy(self):
         X = Semicategory(label=self.label, objects=self.object_type, morphisms=self.morphism_type)
         return X
     

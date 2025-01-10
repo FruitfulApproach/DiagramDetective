@@ -1,5 +1,4 @@
 from PyQt5.QtWidgets import QGraphicsTextItem
-from copy import copy
 
 class Label(QGraphicsTextItem):
     def __init__(self, text: str = None, pickled=False):
@@ -24,12 +23,12 @@ class Label(QGraphicsTextItem):
     
     def __deepcopy__(self, memo):
         if id(self) not in memo:
-            l = copy(self)
+            l = self.copy()
             memo[id(self)] = l
             return l
         return memo[id(self)]
     
-    def __copy__(self):
+    def copy(self):
         l = Label(text=self.text)
         return l
     
@@ -42,4 +41,4 @@ class Label(QGraphicsTextItem):
         self.setPlainText(text)
         
     def __repr__(self):
-        return f'{self.text}:Label(@{id(self)}'
+        return f'{self.text}:Label(@{id(self)})'

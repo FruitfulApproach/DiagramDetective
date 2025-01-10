@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import QGraphicsObject
 from gfx.label import Label
-from copy import copy
-from PyQt5.QtCore import QRectF
+from PyQt5.QtCore import QRectF, Qt
+from core.utility import simple_max_contrasting_color
+from PyQt5.QtGui import QPen
 
 class Base(QGraphicsObject):
     def __init__(self, label: str = None, pickled=False):
@@ -36,7 +37,7 @@ class Base(QGraphicsObject):
             memo[id(self)] = n
         return memo[id(self)]
     
-    def __copy__(self):
+    def copy(self):
         n = Base(label=self.label)
         return n
     
@@ -73,10 +74,25 @@ class Base(QGraphicsObject):
         if memo is None:
             memo = set()
         if id(self) not in memo:
-            memo.add(id(self))
-            self._update(rect, memo)    
+            memo.add(id(self))            
+            self._update(rect, memo)
+            
+            ancestor = self.parentItem()
+            while ancestor is not None:
+                ancestor.update(rect, memo)
+                ancestor = ancestor.parentItem()
+                
         if rect is None:
             QGraphicsObject.update(self)
         else:
-            QGraphicsObject.update(self, rect)            
-    
+            QGraphicsObject.update(self, rect)
+            
+    def paint(self, painter, option, widget):        
+        if self.isSelected() and self.scene():
+            shape = self._selectionShape()
+            bgcolor = self.scene().backgroundBrush().color()
+            col = simple_max_contrasting_color(bgcolor)
+            painter.strokePath(shape, QPen(col, 1.0, Qt.DotLine))
+            
+    def _selectionShape(self):
+        raise NotImplementedError

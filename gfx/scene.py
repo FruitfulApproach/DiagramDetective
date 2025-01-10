@@ -7,6 +7,7 @@ from gfx.label import Label
 from gfx.node import Node
 from core.qt_pickle_utility import SimpleBrush
 from gfx.arrow import Arrow
+from functools import cmp_to_key
 
 class Scene(QGraphicsScene):
     def __init__(self, pickled=False):
@@ -129,6 +130,15 @@ class Scene(QGraphicsScene):
             
             items = self.items(event.scenePos())
             
+            def compare(a, b):
+                if a.isAncestorOf(b):
+                    return 1
+                elif b.isAncestorOf(a):
+                    return -1
+                return 0
+            
+            items.sort(key=cmp_to_key(compare))
+            
             for item in items:                
                 if item not in (a, a.target_point, a.source_point):
                     while (not isinstance(item, Node)) or self.arrow_cant_connect_target(a, item):
@@ -136,6 +146,8 @@ class Scene(QGraphicsScene):
                         
                         if item is None:
                             break
+                    else:
+                        break
         
             if item is None:
                 a.delete()
