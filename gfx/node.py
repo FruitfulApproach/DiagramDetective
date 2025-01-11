@@ -8,9 +8,9 @@ from core.qt_pickle_utility import SimpleBrush, Pen
 
 class Node(Base):
     bounding_rect_pad = 6  # BUGFIX: needs to be -1 or else boundingRect always gets rendered for some reason (Qt bug)
-    children_rect_pad = 9  # So there's some area to click inside of
-    boundary_proximity_distance = 7
-    selection_shape_pad = 5    
+    children_rect_pad = 6  # So there's some area to click inside of
+    boundary_proximity_distance = 5
+    selection_shape_pad = 4   
     position_changed = pyqtSignal(QPointF)   # Sends delta
     
     default_border_pen = Pen(QColor(76, 235, 52, 150), 3.0)

@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QColor, QVector2D, QPainterPath
-from PyQt5.QtCore import QPointF
+from PyQt5.QtCore import QPointF, QRectF
 import sys
 
 def simple_max_contrasting_color(color):
@@ -49,3 +49,21 @@ def closest_point_on_path(point:QPointF, path:QPainterPath) -> QPointF:
         return point
 
     return minVec.toPointF()
+
+
+def min_bounding_rect(rect_list):
+    if rect_list == []:
+        return None
+
+    minX = rect_list[0].left()
+    minY = rect_list[0].top()
+    maxX = rect_list[0].right()
+    maxY = rect_list[0].bottom()
+
+    for k in range(1, len(rect_list)):
+        minX = min(minX, rect_list[k].left())
+        minY = min(minY, rect_list[k].top())
+        maxX = max(maxX, rect_list[k].right())
+        maxY = max(maxY, rect_list[k].bottom())
+
+    return QRectF(minX, minY, maxX-minX, maxY-minY)

@@ -103,9 +103,11 @@ class Scene(QGraphicsScene):
                         C = self.ambient_space
                     
                     a = C(None, X, None)
-                    pos = a.mapFromScene(event.scenePos())
-                    a.source_point.setPos(pos)
-                    a.target_point.setPos(pos)
+                    pos = event.scenePos()
+                    if a.parentItem() is not None:
+                        pos = a.parentItem().mapFromScene(pos)
+                    a.setPos(pos)
+                    a.center_label()
                     self._placingArrow = a
                     event.accept()
                 else:
@@ -134,6 +136,8 @@ class Scene(QGraphicsScene):
                             self._movingItems.remove(item)
                             item.setSelected(False)
                             
+                self._movingItems = list(filter(lambda i: not any(j.isAncestorOf(i) for j in self._movingItems), self._movingItems))
+                            
                 event.accept()             
         super().mousePressEvent(event)
         
@@ -142,6 +146,7 @@ class Scene(QGraphicsScene):
             a = self._placingArrow
             pos = a.mapFromScene(event.scenePos())
             a.target_point.setPos(pos)
+            #a.set_line_points()
             a.center_label()
             a.update()
             event.accept()

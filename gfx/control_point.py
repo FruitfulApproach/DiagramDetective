@@ -64,43 +64,11 @@ class ControlPoint(QGraphicsEllipseItem):
         self.update()
                 
     def closest_boundary_pos_to_item(self, item):
-        shape = self.shape()
-        item_shape = item.shape()
-        if shape and item_shape:
-            r0 = shape.boundingRect()
-            r1 = self.mapFromItem(item, item_shape.boundingRect()).boundingRect()
-
-            horiz = (max(r0.left(), r1.left()), min(r0.right(), r1.right()))
-            vert = (max(r0.top(), r1.top()), min(r0.bottom(), r1.bottom()))
-
-            dx = horiz[1] - horiz[0]
-            dy = vert[1] - vert[0]
-
-            c0 = r0.center()
-            c1 = r1.center()
-
-            if dx > 0 or dy > 0:
-                if dx > dy:     # Shared horizontal interval is more prominent
-                    if r1.left() > r0.left():
-                        x = r1.left() + dx/2.0
-                    else:
-                        x = r0.left() + dx/2.0
-                    if c0.y() < c1.y():
-                        y = r0.bottom()
-                    else:
-                        y = r0.top()
-                else:       # Shared vertical interval is more prominent
-                    if r1.top() > r0.top():
-                        y = r1.top() + dy/2.0
-                    else:
-                        y = r0.top() + dy/2.0
-                    if c0.x() < c1.x():
-                        x = r0.right()
-                    else:
-                        x = r0.left()
-                return QPointF(x, y)
-
-            return closest_point_on_path(self.mapFromItem(item, item.boundingRect().center()), shape)
+        shape = item.shape()
+        A = closest_point_on_path(self.pos(), self.mapFromItem(item, shape))
+        v = QVector2D(A - self.pos())
+        v.normalize()
+        return self.pos() + self.radius * v.toPointF()
         
     def paint(self, painter, option, widget):
         painter.setRenderHint(painter.Antialiasing)
