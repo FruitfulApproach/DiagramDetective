@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsScene
 import mathlib.builtins as builtin
-from PyQt5.QtCore import QPointF, Qt
+from PyQt5.QtCore import QPointF, Qt, QRectF, QTimer
 from PyQt5.QtGui import QTransform, QFont, QBrush, QColor, QPen
 from gfx.directed_graph import DirectedGraph
 from gfx.label import Label
@@ -10,6 +10,9 @@ from gfx.arrow import Arrow
 from functools import cmp_to_key
 
 class Scene(QGraphicsScene):
+    scene_rect_pad = 10.0
+    resize_scene_rect_time = 3500
+    
     def __init__(self, pickled=False):
         super().__init__()
         
@@ -17,7 +20,7 @@ class Scene(QGraphicsScene):
         self.setBackgroundBrush(SimpleBrush(QColor(255, 250, 115)))
         self._mousePressed = False
         self._placingArrow = None
-        self._movingItems = False
+        self._movingItems = []
         self._moveItemsMemo = set()
         
         if not pickled:
@@ -32,6 +35,7 @@ class Scene(QGraphicsScene):
             
     def finish_setup(self):
         self.setFont(QFont("Serif", 23))
+        self.setSceneRect(self.itemsBoundingRect())
            
     @property
     def ambient_space(self):
@@ -104,16 +108,33 @@ class Scene(QGraphicsScene):
                     a.target_point.setPos(pos)
                     self._placingArrow = a
                     event.accept()
-                else:                    
-                    self._movingItems = True
-            else:
-                self._movingItems = True
-               
-            if self._movingItems:            
-                for item in self.selectedItems():
+                else:
+                    self._movingItems = self.selectedItems()
+            elif isinstance(item, Label):
+                item = item.parentItem()
+                if not item.isSelected():
+                    for item1 in self.selectedItems():
+                        item1.setSelected(False)
+                    item.setSelected(True)
+                self._movingItems = self.selectedItems()
+                                          
+            if self._movingItems:
+                for item in list(self._movingItems):
+                    if isinstance(item, Label):
+                        parent = item.parentItem()
+                        if isinstance(parent, Node):
+                            if parent not in self._movingItems:
+                                self._movingItems.append(parent)
+                        self._movingItems.remove(item)                    
+                                    
                     if isinstance(item, Arrow):
-                        self._moveItemsMemo.add(id(item))
+                        if item.source in self._movingItems and item.target in self._movingItems:
+                            self._moveItemsMemo.add(id(item))
+                        else:
+                            self._movingItems.remove(item)
+                            item.setSelected(False)
                             
+                event.accept()             
         super().mousePressEvent(event)
         
     def mouseMoveEvent(self, event):
@@ -126,16 +147,31 @@ class Scene(QGraphicsScene):
             event.accept()
         else:
             if self._movingItems:
+                event.accept()
                 delta = event.scenePos() - event.lastScenePos()
                 memo = set(self._moveItemsMemo)
                 
-                for item in self.selectedItems():
+                for item in self._movingItems:
                     item.setPos(item.pos() + delta)
-                    item.update(memo=memo, force=True, arrows=False)
+                    item.update(memo=memo, arrows=True)
                     
-                self.accept()
-                
-        self.setSceneRect(self.itemsBoundingRect())
+                    if isinstance(item, Node):
+                        space: DirectedGraph = item.parent_graph
+                        
+                        for arrow in space.arrows_from(item):
+                            arrow.update(memo=memo)
+                            
+                        for arrow in space.arrows_to(item):
+                            arrow.update(memo=memo)
+                        
+                        parent = item
+                        while (parent := parent.parentItem()) is not None:
+                            parent.update(memo=memo)
+                        
+                        #self.ambient_space.update(memo=memo)
+                        self.update(rect=self.ambient_space.boundingRect())
+                        
+        self.setSceneRect(self.itemsBoundingRect())            
         super().mouseMoveEvent(event)
         
     def mouseReleaseEvent(self, event):
@@ -155,6 +191,7 @@ class Scene(QGraphicsScene):
                 return 0
             
             items.sort(key=cmp_to_key(compare))
+            item = None
             
             for item in items:                
                 if item not in (a, a.target_point, a.source_point):
@@ -177,7 +214,7 @@ class Scene(QGraphicsScene):
                     a.delete()
         
         elif self._movingItems:
-            self._movingItems = False
+            self._movingItems.clear()
             self._moveItemsMemo.clear()
         super().mouseReleaseEvent(event)
         self.setSceneRect(self.itemsBoundingRect())
@@ -186,4 +223,8 @@ class Scene(QGraphicsScene):
         space = arrow.parent_graph
         return space.arrow_cant_connect_target(arrow, node)
         
-        
+    def setSceneRect(self, rect: QRectF):
+        self._sceneRectTimer = None
+        p = self.scene_rect_pad
+        rect.adjust(-p, -p, p, p)
+        super().setSceneRect(rect)

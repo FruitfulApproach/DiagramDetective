@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsTextItem, QMenu
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtCore import Qt, QPoint, QRectF
+import gfx.node as node
 
 class Label(QGraphicsTextItem):
     def __init__(self, text: str = None, pickled=False):
@@ -66,4 +67,21 @@ class Label(QGraphicsTextItem):
             
     def focusOutEvent(self, event):
         # this is required in order to allow movement using the mouse
-        self.setTextInteractionFlags(Qt.NoTextInteraction)            
+        self.setTextInteractionFlags(Qt.NoTextInteraction)
+        
+    def update(self, rect: QRectF = None, memo: set = None, force: bool = False, arrows: bool = True):
+        if memo is None:
+            memo = set()
+            
+        if force or id(self) not in memo:
+            memo.add(id(self))
+            parent = self.parentItem()
+            
+            if rect is None:
+                super().update()
+            else:
+                super().update(rect)
+            
+            if isinstance(parent, node.Node):
+                parent.update(None, memo, force, arrows)
+                

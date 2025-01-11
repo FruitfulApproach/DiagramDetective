@@ -90,6 +90,9 @@ class Arrow(Base):
         if isinstance(space, DirectedGraph):
             space.arrow_source_was_set(self, prev_node)
         
+        if source is not None:
+            self.setZValue(source.zValue() - 1)
+        
         self.update()
         
     @target.setter
@@ -103,10 +106,13 @@ class Arrow(Base):
         if isinstance(space, DirectedGraph):
             space.arrow_target_was_set(self, prev_node)
             
+        if target is not None:
+            self.setZValue(target.zValue() - 1)            
+            
         self.update()
         
     def boundingRect(self):
-        h = self.head_size() / 2.0
+        h = self.head_size() / 2 + self._intersectShapeWidth()
         return self.childrenBoundingRect().adjusted(-h, -h, h, h)
     
     def head_size(self):
@@ -298,10 +304,13 @@ class Arrow(Base):
         stroker = QPainterPathStroker()
         stroker.setCapStyle(Qt.RoundCap)
         stroker.setJoinStyle(Qt.RoundJoin)
-        stroker.setWidth(self.pen.width() * self.intersect_shape_width_multiple)
+        stroker.setWidth(self._intersectShapeWidth())
         path.addPath(self._linePath)
         path.addPath(self._headPath)
         self._shape = stroker.createStroke(path)
+        
+    def _intersectShapeWidth(self):
+        return self.pen.width() * self.intersect_shape_width_multiple
                 
     def shape(self):
         return self._shape    
