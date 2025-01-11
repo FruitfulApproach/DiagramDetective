@@ -174,3 +174,4 @@ cython_debug/
 *.tlog
 /DiagramChaser/x64
 /_DiagramDetective/x64
+DiagramDetective.exe
