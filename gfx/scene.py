@@ -152,6 +152,7 @@ class Scene(QGraphicsScene):
                 if isinstance(item, Node) and not self.arrow_cant_connect_target(a, item):
                     a.target = item
                     a.center_label()
+                    a.update(force=True)
                 else:
                     a.delete()
                 

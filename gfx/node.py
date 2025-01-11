@@ -274,6 +274,8 @@ class Node(Base):
         return path
 
     def _update(self, rect:QRectF, memo: set):
+        from datetime import datetime
+        print(f"({datetime.now()}) Node._update()")
         space = self.parent_graph
         space.update_connecting_arrows(self, memo)
             

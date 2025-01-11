@@ -3,10 +3,15 @@ from gfx.label import Label
 from PyQt5.QtCore import QRectF, Qt
 from core.utility import simple_max_contrasting_color
 from PyQt5.QtGui import QPen
+from datetime import datetime, timedelta
 
 class Base(QGraphicsObject):
+    minimum_update_interval = timedelta(milliseconds=25)
+    
     def __init__(self, label: str = None, pickled=False):
         super().__init__()
+        
+        self._previousUpdateTime = None
         
         if not pickled:
             self._label = Label(label)
@@ -70,22 +75,27 @@ class Base(QGraphicsObject):
             return self.scene().ambient_space        
         return parent
     
-    def update(self, rect: QRectF = None, memo: set = None):
+    def update(self, rect: QRectF = None, memo: set = None, force=False):
         if memo is None:
             memo = set()
         if id(self) not in memo:
-            memo.add(id(self))            
-            self._update(rect, memo)
+            memo.add(id(self))
             
-            ancestor = self.parentItem()
-            while ancestor is not None:
-                ancestor.update(rect, memo)
-                ancestor = ancestor.parentItem()
+            if force or self._previousUpdateTime is None or \
+               (datetime.now()- self._previousUpdateTime) > self.minimum_update_interval:
+                self._update(rect, memo)
                 
-        if rect is None:
-            QGraphicsObject.update(self)
-        else:
-            QGraphicsObject.update(self, rect)
+                ancestor = self.parentItem()
+                while ancestor is not None:
+                    ancestor.update(rect, memo)
+                    ancestor = ancestor.parentItem()
+                    
+                if rect is None:
+                    QGraphicsObject.update(self)
+                else:
+                    QGraphicsObject.update(self, rect)
+                
+                self._previousUpdateTime = datetime.now()
             
     def paint(self, painter, option, widget):        
         if self.isSelected() and self.scene():
