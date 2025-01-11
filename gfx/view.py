@@ -8,7 +8,7 @@ class View(QGraphicsView):
         #self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setFocusPolicy(Qt.StrongFocus)
         self.setMouseTracking(True)
-        self.setRubberBandSelectionMode(Qt.IntersectsItemShape)
+        self.setRubberBandSelectionMode(Qt.ContainsItemShape)
         self.setDragMode(self.RubberBandDrag)
         
         if not pickled:

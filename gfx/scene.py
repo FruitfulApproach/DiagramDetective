@@ -17,7 +17,7 @@ class Scene(QGraphicsScene):
         super().__init__()
         
         # TODO
-        self.setBackgroundBrush(SimpleBrush(QColor(255, 250, 115)))
+        self.setBackgroundBrush(SimpleBrush(Qt.lightGray))
         self._mousePressed = False
         self._placingArrow = None
         self._movingItems = []
@@ -25,7 +25,6 @@ class Scene(QGraphicsScene):
         
         if not pickled:
             S = self._ambientSpace = builtin.BigCat
-            S.setVisible(False)
             self.addItem(S)
             A = S()
             A.setPos(QPointF(-100, -100))
@@ -35,23 +34,23 @@ class Scene(QGraphicsScene):
             
     def finish_setup(self):
         self.setFont(QFont("Serif", 23))
-        self.setSceneRect(self.itemsBoundingRect())
+        self.ambient_space.setFlag(self.ambient_space.ItemIsSelectable, False)
            
     @property
     def ambient_space(self):
         return self._ambientSpace
     
-    def drawBackground(self, painter, rect):
-        space = self.ambient_space
-        r = space.corner_radius
-        painter.setRenderHint(painter.Antialiasing)
-        painter.setBrush(space.fill_brush)
-        painter.setPen(space.border_pen)
-        painter.drawRoundedRect(self.sceneRect(), r, r)
-        painter.setRenderHint(painter.Antialiasing)
-        painter.setFont(self.font())
-        painter.setPen(QPen(Qt.black, 1.0))   # TODO: implement text_color in base; then here grab it from ambient_space
-        painter.drawText(QPointF(), self.ambient_space.label)
+    #def drawBackground(self, painter, rect):
+        #space = self.ambient_space
+        #r = space.corner_radius
+        #painter.setRenderHint(painter.Antialiasing)
+        #painter.setBrush(space.fill_brush)
+        #painter.setPen(space.border_pen)
+        #painter.drawRoundedRect(self.sceneRect(), r, r)
+        #painter.setRenderHint(painter.Antialiasing)
+        #painter.setFont(self.font())
+        #painter.setPen(QPen(Qt.black, 1.0))   # TODO: implement text_color in base; then here grab it from ambient_space
+        #painter.drawText(QPointF(), self.ambient_space.label)
         
     def mouseDoubleClickEvent(self, event):
         if self._placingArrow:
@@ -95,23 +94,27 @@ class Scene(QGraphicsScene):
                 r = item.connect_button_rect()
                 p = item.mapFromScene(event.scenePos())
                 
-                if len(self.selectedItems()) <= 1 and r.contains(p) and item.in_arrow_connect_mode:
-                    X = item
-                    C = item.parentItem()
-                    
-                    if C is None:
-                        C = self.ambient_space
-                    
-                    a = C(None, X, None)
-                    pos = event.scenePos()
-                    if a.parentItem() is not None:
-                        pos = a.parentItem().mapFromScene(pos)
-                    a.setPos(pos)
-                    a.center_label()
-                    self._placingArrow = a
-                    event.accept()
+                if item is not self.ambient_space:                    
+                    if len(self.selectedItems()) <= 1 and r.contains(p) and item.in_arrow_connect_mode:
+                        X = item
+                        C = item.parentItem()
+                        
+                        if C is None:
+                            C = self.ambient_space
+                        
+                        a = C(None, X, None)
+                        pos = event.scenePos()
+                        if a.parentItem() is not None:
+                            pos = a.parentItem().mapFromScene(pos)
+                        a.setPos(pos)
+                        a.center_label()
+                        self._placingArrow = a
+                        event.accept()
+                    else:
+                        self._movingItems = self.selectedItems()
                 else:
                     self._movingItems = self.selectedItems()
+                    
             elif isinstance(item, Label):
                 item = item.parentItem()
                 if not item.isSelected():
@@ -149,6 +152,7 @@ class Scene(QGraphicsScene):
             #a.set_line_points()
             a.center_label()
             a.update()
+            self.update()
             event.accept()
         else:
             if self._movingItems:
@@ -160,23 +164,23 @@ class Scene(QGraphicsScene):
                     item.setPos(item.pos() + delta)
                     item.update(memo=memo, arrows=True)
                     
-                    if isinstance(item, Node):
-                        space: DirectedGraph = item.parent_graph
+                self.update()
+                    
+                    #if isinstance(item, Node):
+                        #space: DirectedGraph = item.parent_graph
                         
-                        for arrow in space.arrows_from(item):
-                            arrow.update(memo=memo)
+                        #for arrow in space.arrows_from(item):
+                            #arrow.update(memo=memo)
                             
-                        for arrow in space.arrows_to(item):
-                            arrow.update(memo=memo)
+                        #for arrow in space.arrows_to(item):
+                            #arrow.update(memo=memo)
                         
-                        parent = item
-                        while (parent := parent.parentItem()) is not None:
-                            parent.update(memo=memo)
+                        #parent = item
+                        #while (parent := parent.parentItem()) is not None:
+                            #parent.update(memo=memo)
                         
                         #self.ambient_space.update(memo=memo)
-                        self.update(rect=self.ambient_space.boundingRect())
-                        
-        self.setSceneRect(self.itemsBoundingRect())            
+                                 
         super().mouseMoveEvent(event)
         
     def mouseReleaseEvent(self, event):
@@ -217,19 +221,15 @@ class Scene(QGraphicsScene):
                     a.update(force=True)
                 else:
                     a.delete()
+                    
+            self.update()
         
         elif self._movingItems:
             self._movingItems.clear()
             self._moveItemsMemo.clear()
         super().mouseReleaseEvent(event)
-        self.setSceneRect(self.itemsBoundingRect())
         
     def arrow_cant_connect_target(self, arrow: Arrow, node: Node) -> bool:
         space = arrow.parent_graph
         return space.arrow_cant_connect_target(arrow, node)
         
-    def setSceneRect(self, rect: QRectF):
-        self._sceneRectTimer = None
-        p = self.scene_rect_pad
-        rect.adjust(-p, -p, p, p)
-        super().setSceneRect(rect)

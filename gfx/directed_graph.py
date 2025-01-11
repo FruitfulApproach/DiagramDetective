@@ -93,12 +93,8 @@ class DirectedGraph(Object):
         if i.label not in by_label:
             by_label[i.label] = [i]
         else:
-            by_label[i.label].append(i)        
-        
-        if self is self.scene().ambient_space:
-            self.scene().addItem(i)
-        else:
-            i.setParentItem(self)
+            by_label[i.label].append(i)          
+        i.setParentItem(self)
             
     def update_connecting_arrows(self, n: Node, memo: set):
         for a in self.arrows_from(n):
