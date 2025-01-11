@@ -19,12 +19,12 @@ class Scene(QGraphicsScene):
         self._placingArrow = None
         
         if not pickled:
-            C = self._ambientSpace = builtin.BigCat
-            C.setVisible(False)
-            self.addItem(C)
-            A = C("A")
+            S = self._ambientSpace = builtin.BigCat
+            S.setVisible(False)
+            self.addItem(S)
+            A = S()
             A.setPos(QPointF(-100, -100))
-            B = C("B")
+            B = S()
             B.setPos(QPointF(100, 100))
             self.finish_setup()
             
@@ -116,6 +116,7 @@ class Scene(QGraphicsScene):
                 self.update()                        
             
             super().mouseMoveEvent(event)
+        self.setSceneRect(self.itemsBoundingRect())
         
     def mouseReleaseEvent(self, event):
         self._mousePressed = False
@@ -156,6 +157,7 @@ class Scene(QGraphicsScene):
                 
         self.update()                           # BUGFIX: selection rubber band artifacts
         super().mouseReleaseEvent(event)
+        self.setSceneRect(self.itemsBoundingRect())
         
     def arrow_cant_connect_target(self, arrow: Arrow, node: Node) -> bool:
         space = arrow.parent_graph

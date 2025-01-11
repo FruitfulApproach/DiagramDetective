@@ -75,3 +75,10 @@ class View(QGraphicsView):
             elif event.key() == Qt.Key_Minus:
                 self.zoom_out()
         super().keyPressEvent(event)
+
+    def zoom_to_fit_scene_rect(self):
+        self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
+        
+    def setScene(self, scene):        
+        super().setScene(scene)        
+        self.zoom_to_fit_scene_rect()

@@ -1,4 +1,6 @@
 import string
+import unicodedata
+
 
 # Taken from: 
 # https://stackoverflow.com/a/73427869/7076615
@@ -13,13 +15,22 @@ Script_A_Bold = 0x1D4D0
 Script_a = 0x1D4B6
 Script_a_Bold = 0x1D4EA
 Script_z = 0x1D4CF
+Script_z_Bold = 0x1D503
 
 Scripts = ''.join([chr(x) for x in range(Script_A, Script_z + 1)])
 AsciiLetters = string.ascii_uppercase + string.ascii_lowercase
-ScriptsTable = AsciiLetters.maketrans( AsciiLetters, Scripts)
+ScriptsTable = AsciiLetters.maketrans(AsciiLetters, Scripts)
+BoldScripts = ''.join([chr(x) for x in range(Script_A_Bold, Script_z_Bold + 1)])
+BoldScriptsTable = AsciiLetters.maketrans(AsciiLetters, BoldScripts)
+ScriptsTable['F'] = 0x2131
+print(ScriptsTable['F'])
+print(ScriptsTable)
 
-def ascii_letters_to_script(ascii_letters: str) -> str:
-    return ascii_letters.translate(ScriptsTable)
+def ascii_letters_to_script(ascii_letters: str, bold: bool = False) -> str:
+    if not bold:
+        return ascii_letters.translate(ScriptsTable)
+    else:
+        return ascii_letters.translate(BoldScriptsTable)
 
 def next_ascii_prime_variable(var: str) -> str:
     letter = var[0]        
@@ -30,4 +41,12 @@ def next_ascii_prime_variable(var: str) -> str:
     elif letter == 'z':
         return 'a' + var[1:] + "'"
     else:
-        assert 0    
+        assert 0
+        
+        
+def can_display_char(char):
+    try:
+        unicodedata.name(char)
+        return True
+    except ValueError:
+        return False

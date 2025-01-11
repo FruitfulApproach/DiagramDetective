@@ -14,6 +14,6 @@ if __name__ == '__main__':
     view = View()
     window.setCentralWidget(view)
     scene = Scene()
-    view.setScene(scene)
-    window.show()
+    view.setScene(scene)    
+    window.showMaximized()    
     sys.exit(app.exec_())
