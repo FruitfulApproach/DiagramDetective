@@ -1,7 +1,7 @@
 from gfx.base import Base
 from gfx.node import Node
 from copy import deepcopy
-from PyQt5.QtCore import QPointF, QLineF, Qt, QRectF
+from PyQt5.QtCore import QPointF, QLineF, Qt, QRectF, QTimer
 from PyQt5.QtGui import QPainterPath, QVector2D, QPainterPathStroker
 from gfx.control_point import ControlPoint
 from core.qt_pickle_utility import Pen
@@ -10,6 +10,13 @@ from gfx.label import Label
 
 class Arrow(Base):
     default_relative_head_size = 5.0
+    intersect_shape_width_multiple = 5.0
+    control_point_visible_time = 5000
+    
+    SingleLine, DoubleLine, WavySingleLine, \
+    WavyDoubleLine, TripleLine = range(5)    
+    NoHead, SingleHead, DoubleHead, TripleHead = range(4)    
+    NoTail, HookTail, VeeTail = range(3)    
     
     def __init__(self, label: str=None, source: Node = None, target: Node = None, pickled=False):
         super().__init__(label, pickled)
@@ -18,7 +25,9 @@ class Arrow(Base):
         self._updatingPointPos = False
         self._lastLabelPosLine = None
         self._shape = QPainterPath()
+        self._arrowShape = QPainterPath()
         
+        self.label_item.setFlags(self.label_item.flags() | self.ItemIsMovable)
         self.setFlags(self.ItemIsSelectable | self.ItemIsFocusable)
         self.setAcceptHoverEvents(True)
         
@@ -27,9 +36,8 @@ class Arrow(Base):
             self._bezier = False
             self._relativeHeadSize = self.default_relative_head_size
             self._points = [ControlPoint() for i in range(0, 4)]
-            self._bezier = None
-            for point in self._points:
-                point.setVisible(False)
+            self._tailStyle = self.NoTail
+            self._headStyle = self.SingleHead
             Arrow.finish_setup(self)
             
     def __setstate__(self, data):
@@ -46,6 +54,7 @@ class Arrow(Base):
             
     def finish_setup(self):
         for point in self._points:
+            point.setVisible(False)
             point.setParentItem(self)
         self.update_shape()
         
@@ -246,7 +255,7 @@ class Arrow(Base):
         painter.setRenderHint(painter.Antialiasing)
         line = self.line()
         painter.setPen(self.pen)
-        painter.drawLine(line)        
+        painter.drawPath(self._arrowShape)        
         super().paint(painter, option, widget)
 
     @property
@@ -281,14 +290,16 @@ class Arrow(Base):
         self.deleteLater()
         
     def update_shape(self):
-        path = QPainterPath()
-        line = self.line()
-        path.moveTo(line.p1())
-        path.lineTo(line.p2())
+        path = self._arrowShape
+        path.clear()
+        self._linePath = self.compute_line_path()
+        self._headPath = self.compute_head_path()
         stroker = QPainterPathStroker()
         stroker.setCapStyle(Qt.RoundCap)
         stroker.setJoinStyle(Qt.RoundJoin)
-        stroker.setWidth(4*self.pen.widthF())
+        stroker.setWidth(self.pen.width() * self.intersect_shape_width_multiple)
+        path.addPath(self._linePath)
+        path.addPath(self._headPath)
         self._shape = stroker.createStroke(path)
                 
     def shape(self):
@@ -299,19 +310,56 @@ class Arrow(Base):
     
     def hoverEnterEvent(self, event):
         if self.is_bezier:
-            for point in self._points:
+            for point in self._points[1:-1]:
                 point.setVisible(True)  
         super().hoverEnterEvent(event)
         
     def hoverLeaveEvent(self, event):
-        for point in self._points:
-            point.setVisible(False)
+        tmr = self._pointVisTimer = QTimer()
+        tmr.setSingleShot(True)
+        tmr.setInterval(self.control_point_visible_time)
+        tmr.timeout.connect(self._hideControlPoints)
+        tmr.start()
         super().hoverLeaveEvent(event)
         
-    def contextMenuEvent(self, event):
-        menu = QMenu()
-        menu.addAction(f"Delete arrow {self.label}").triggered.connect(self.delete)
+    def _hideControlPoints(self):
+        for point in self._points:
+            point.setVisible(False)
         
+    def contextMenuEvent(self, event):
+        menu = self._buildContextMenu(event)
         menu.exec_(event.screenPos())
         
+    def _buildContextMenu(self, event):
+        menu = QMenu()
+        menu.addAction(f"Delete arrow {self.label}").triggered.connect(self.delete)
+        menu.addSeparator()
+        action = menu.addAction("Bezier curve")
+        action.setCheckable(True)
+        action.setChecked(self.is_bezier)
+        action.triggered.connect(lambda b: self.toggle_bezier())
+        return menu
             
+    def toggle_bezier(self, toggled=None):
+        if toggled is None:
+            toggled = not self.is_bezier
+            
+        if toggled != self.is_bezier:
+            self._bezier = toggled
+            self._points[1].setVisible(toggled)
+            self._points[2].setVisible(toggled)
+            if not toggled:
+                self.set_line_points(self._points[0].pos(), self._points[-1].pos())
+                self.update()
+                
+    def set_line_points(self, pos0, pos1):
+        u = pos1 - pos0
+        u /= (len(self._points) - 1)
+        for k in range(0, len(self._points)):
+            self._points[k].setPos(pos0 + k*u)
+            
+    def center_label(self):
+        self.label_item.setPos((self._points[0].pos() + self._points[-1].pos()) / 2)
+        
+    def show_control_points_longer(self):
+        self._pointVisTimer.start()

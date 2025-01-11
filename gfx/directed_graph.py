@@ -1,8 +1,12 @@
 from gfx.arrow import Arrow
 from gfx.node import Node
 from mathlib.object import Object
+from core.unicode_utility import next_ascii_prime_variable
 
 class DirectedGraph(Object):
+    node_label_start = 'A'
+    arrow_label_start = 'a'
+    
     def __init__(self, label: str = None, node_type: Node = None, arrow_type: Arrow = None, pickled=False):
         super().__init__(label, pickled)
         self._nodes = {}    # Keyed by id()
@@ -59,16 +63,20 @@ class DirectedGraph(Object):
     def is_empty(self):
         return self.node_type is None
     
-    def __call__(self, label: str, source: Node=None, target: Node=None):
+    def __call__(self, label: str = None, source: Node=None, target: Node=None):
         if target is None and source is None:
+            if label is None:
+                label = self.unused_node_variable_label()            
             n = self._nodeType.copy()
             n.label = label
             self._addNode(n)
             return n
         else:
+            if label is None:
+                label = self.unused_arrow_variable_label()
             a = self._arrowType.copy()
-            self._addArrow(a)
             a.label = label
+            self._addArrow(a)            
             a.source = source
             a.target = target            
             return a
@@ -105,6 +113,8 @@ class DirectedGraph(Object):
         if l in by_label:
             if a in by_label[l]:
                 by_label[l].remove(a)
+            if len(by_label[l]) == 0:
+                del by_label[l]
         i = id(a)
         if i in self._arrows:
             del self._arrows[i]
@@ -113,11 +123,15 @@ class DirectedGraph(Object):
         if i in from_node:
             if a in from_node[i]:
                 from_node[i].remove(a)
+            if len(from_node[i]) == 0:
+                del from_node[i]
         to_node = self._arrowsToNode
         i = id(a.target)
         if i in to_node:
             if a in to_node[i]:
                 to_node[i].remove(a)
+            if len(to_node[i]) == 0:
+                del to_node[i]
                 
     def arrow_cant_connect_target(self, arrow: Arrow, target: Node) -> bool:
         return self._arrowCantConnect(arrow, target, arrow.source)
@@ -131,7 +145,20 @@ class DirectedGraph(Object):
         if node.isAncestorOf(arrow):
             return True
         return False
+    
+    def unused_node_variable_label(self):
+        var = self.node_label_start        
+        while var in self._nodesByLabel:
+            var = next_ascii_prime_variable(var)
+        return var
+    
+    def unused_arrow_variable_label(self):
+        var = self.arrow_label_start
+        while var in self._arrowsByLabel:
+            var = next_ascii_prime_variable(var)
+        return var
 
+            
             
         
         

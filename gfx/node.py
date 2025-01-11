@@ -3,17 +3,17 @@ from PyQt5.QtCore import pyqtSignal, QPointF, QRectF, Qt
 from PyQt5.QtGui import QPen, QBrush, QColor, QPainterPath, QVector2D
 from gfx.utility import filter_out_gfx_descendents
 from gfx.connect_button import ConnectButton
-from core.utility import simple_max_contrasting_color, closest_point_on_path
+from core.utility import closest_point_on_path
 from core.qt_pickle_utility import SimpleBrush, Pen
 
 class Node(Base):
-    bounding_rect_pad = 22  # BUGFIX: needs to be -1 or else boundingRect always gets rendered for some reason (Qt bug)
-    children_rect_pad = 16  # So there's some area to click inside of
-    boundary_proximity_distance = 12
+    bounding_rect_pad = 3  # BUGFIX: needs to be -1 or else boundingRect always gets rendered for some reason (Qt bug)
+    children_rect_pad = 9  # So there's some area to click inside of
+    boundary_proximity_distance = 7
     selection_shape_pad = 5    
     position_changed = pyqtSignal(QPointF)   # Sends delta
     
-    default_border_pen = Pen(QColor(51, 180, 255), 3.0)
+    default_border_pen = Pen(QColor(27, 90, 255), 3.0)
     default_fill_brush = QBrush(SimpleBrush(Qt.yellow))
     default_corner_radius = 11.0
         

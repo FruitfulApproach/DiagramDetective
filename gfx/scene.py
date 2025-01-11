@@ -57,9 +57,8 @@ class Scene(QGraphicsScene):
         
         if item is None:
             S = self.ambient_space
-            dbg_label = "S"
             pos = event.scenePos()
-            X = S(dbg_label)
+            X = S()
             X.set_center_pos(pos)
         else:
             if isinstance(item, Label):
@@ -68,15 +67,11 @@ class Scene(QGraphicsScene):
             if isinstance(item, Node):
                 r = item.connect_button_rect()
                 p = item.mapFromScene(event.scenePos())
-                
-                if r.contains(p) and item.in_arrow_connect_mode():
-                    print("CONNECT")
             
                 if isinstance(item, DirectedGraph):
                     S = item
-                    dbg_label = "s"
                     pos = item.mapFromScene(event.scenePos())
-                    X = S(dbg_label)
+                    X = S()
                     X.set_center_pos(pos)
                 else:
                     super().mouseDoubleClickEvent(event)
@@ -100,7 +95,7 @@ class Scene(QGraphicsScene):
                     if C is None:
                         C = self.ambient_space
                     
-                    a = C("a", X, None)
+                    a = C(None, X, None)
                     pos = a.mapFromScene(event.scenePos())
                     a.source_point.setPos(pos)
                     a.target_point.setPos(pos)
@@ -114,6 +109,7 @@ class Scene(QGraphicsScene):
             a = self._placingArrow
             pos = a.mapFromScene(event.scenePos())
             a.target_point.setPos(pos)
+            a.center_label()
             a.update()
         else:
             if self._mousePressed:
@@ -154,6 +150,7 @@ class Scene(QGraphicsScene):
             else:
                 if isinstance(item, Node) and not self.arrow_cant_connect_target(a, item):
                     a.target = item
+                    a.center_label()
                 else:
                     a.delete()
                 

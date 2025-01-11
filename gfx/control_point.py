@@ -6,16 +6,15 @@ from core.qt_pickle_utility import SimpleBrush, Pen
 from core.utility import closest_point_on_path
 
 class ControlPoint(QGraphicsEllipseItem):
-    default_fill_brush = SimpleBrush(Qt.yellow)
-    default_border_pen = Pen(QColor(Qt.white), 1.0)
-    default_radius = 5.0
+    default_fill_brush = SimpleBrush(Qt.cyan)
+    default_border_pen = Pen(QColor(Qt.blue), 1.0)
+    default_radius = 7.5
     
     def __init__(self, new=None):
         if new is None: new = True
         super().__init__()
         super().__init__()
-        #self.setFlag(self.ItemIsMovable, True)  # BUGFIX: don't wipe out other flags
-        #self.setFlag(self.ItemIsSelectable, True)
+        self.setFlag(self.ItemIsMovable, True)  # BUGFIX: don't wipe out other flags
         self.setFlag(self.ItemIsFocusable, True)
         self.setFlag(self.ItemSendsScenePositionChanges, True)
         self.setFlag(self.ItemSendsGeometryChanges, True)        
@@ -103,5 +102,11 @@ class ControlPoint(QGraphicsEllipseItem):
 
             return closest_point_on_path(self.mapFromItem(item, item.boundingRect().center()), shape)
         
-
-      
+    def paint(self, painter, option, widget):
+        painter.setRenderHint(painter.Antialiasing)
+        super().paint(painter, option, widget)
+        
+    def mouseMoveEvent(self, event):
+        self.parentItem().show_control_points_longer()
+        self.parentItem().update()
+        super().mouseMoveEvent(event)

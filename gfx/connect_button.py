@@ -2,7 +2,7 @@ from PyQt5.QtCore import QRectF, Qt, QPointF
 from PyQt5.QtGui import QColor, QBrush, QPen
 
 class ConnectButton:
-    default_radius = 11
+    default_radius = 7
     default_fill_brush = QBrush(Qt.green)
     default_border_pen = QPen(Qt.darkGreen, 1)
     

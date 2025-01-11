@@ -4,6 +4,7 @@ from mathlib.object import Object
 class Morphism(Arrow):
     def __init__(self, label: str, dom: Object = None, cod: Object = None, pickled=False):
         super().__init__(label, dom, cod, pickled)
+        self._supposedlyEpic = False
         
     @property
     def category(self):
@@ -20,3 +21,25 @@ class Morphism(Arrow):
     @property
     def cod(self):
         return self.target
+    
+    def _buildContextMenu(self, event):
+        menu = super()._buildContextMenu(event)
+        menu.addSeparator()
+        action = menu.addAction("Epimorphism")
+        action.setCheckable(True)
+        action.setChecked(self.is_supposedly_epic)
+        action.triggered.connect(self.suppose_epimorphism)        
+        return menu
+    
+    def suppose_epimorphism(self, true: bool):
+        if true:
+            self._supposedlyEpic = True
+            self._headStyle = self.DoubleHead
+        else:
+            self._supposedlyEpic = False
+            self._headStyle = self.SingleHead
+        self.update()
+        
+    @property
+    def is_supposedly_epic(self):
+        return self._supposedlyEpic

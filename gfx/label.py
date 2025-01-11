@@ -1,10 +1,14 @@
-from PyQt5.QtWidgets import QGraphicsTextItem
+from PyQt5.QtWidgets import QGraphicsTextItem, QMenu
+from PyQt5.QtCore import Qt, QPoint
 
 class Label(QGraphicsTextItem):
     def __init__(self, text: str = None, pickled=False):
         super().__init__()
         if text is not None:
             self.setPlainText(text)
+        
+        #self.setFlags(self.ItemIsFocusable)
+        
         if not pickled:
             self.finish_setup()
     
@@ -42,3 +46,24 @@ class Label(QGraphicsTextItem):
         
     def __repr__(self):
         return f'{self.text}:Label(@{id(self)})'
+    
+    def contextMenuEvent(self, event):
+        menu = QMenu()
+        menu.addAction("Edit text").triggered.connect(lambda b: self.start_editing_text(event.pos()))
+        menu.exec_(event.screenPos())
+        
+    def start_editing_text(self, mouse_pos: QPoint):
+        if self.textInteractionFlags() != Qt.TextEditorInteraction:
+            self.setTextInteractionFlags(Qt.TextEditorInteraction)
+            self.setFocus()
+            # the following lines are used to correctly place the text 
+            # cursor at the mouse cursor position
+            cursorPos = self.document().documentLayout().hitTest(
+                        mouse_pos, Qt.FuzzyHit)
+            textCursor = self.textCursor()
+            textCursor.setPosition(cursorPos)
+            self.setTextCursor(textCursor)
+            
+    def focusOutEvent(self, event):
+        # this is required in order to allow movement using the mouse
+        self.setTextInteractionFlags(Qt.NoTextInteraction)            
