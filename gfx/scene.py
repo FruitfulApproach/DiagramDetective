@@ -17,6 +17,8 @@ class Scene(QGraphicsScene):
         self.setBackgroundBrush(SimpleBrush(QColor(255, 250, 115)))
         self._mousePressed = False
         self._placingArrow = None
+        self._movingItems = False
+        self._moveItemsMemo = set()
         
         if not pickled:
             S = self._ambientSpace = builtin.BigCat
@@ -79,6 +81,7 @@ class Scene(QGraphicsScene):
     def mousePressEvent(self, event):
         self._mousePressed = True
         item = self.itemAt(event.scenePos(), QTransform())
+        
         if item is None:
             for item in self.items():    
                 item.setSelected(False)             # BUGFIX: items were not automatically deselected already... o_o
@@ -88,7 +91,7 @@ class Scene(QGraphicsScene):
                 r = item.connect_button_rect()
                 p = item.mapFromScene(event.scenePos())
                 
-                if r.contains(p) and item.in_arrow_connect_mode:
+                if len(self.selectedItems()) <= 1 and r.contains(p) and item.in_arrow_connect_mode:
                     X = item
                     C = item.parentItem()
                     
@@ -101,7 +104,16 @@ class Scene(QGraphicsScene):
                     a.target_point.setPos(pos)
                     self._placingArrow = a
                     event.accept()
-                    
+                else:                    
+                    self._movingItems = True
+            else:
+                self._movingItems = True
+               
+            if self._movingItems:            
+                for item in self.selectedItems():
+                    if isinstance(item, Arrow):
+                        self._moveItemsMemo.add(id(item))
+                            
         super().mousePressEvent(event)
         
     def mouseMoveEvent(self, event):
@@ -111,12 +123,20 @@ class Scene(QGraphicsScene):
             a.target_point.setPos(pos)
             a.center_label()
             a.update()
+            event.accept()
         else:
-            if self._mousePressed:
-                self.update()                        
-            
-            super().mouseMoveEvent(event)
+            if self._movingItems:
+                delta = event.scenePos() - event.lastScenePos()
+                memo = set(self._moveItemsMemo)
+                
+                for item in self.selectedItems():
+                    item.setPos(item.pos() + delta)
+                    item.update(memo=memo, force=True, arrows=False)
+                    
+                self.accept()
+                
         self.setSceneRect(self.itemsBoundingRect())
+        super().mouseMoveEvent(event)
         
     def mouseReleaseEvent(self, event):
         self._mousePressed = False
@@ -155,8 +175,10 @@ class Scene(QGraphicsScene):
                     a.update(force=True)
                 else:
                     a.delete()
-                
-        self.update()                           # BUGFIX: selection rubber band artifacts
+        
+        elif self._movingItems:
+            self._movingItems = False
+            self._moveItemsMemo.clear()
         super().mouseReleaseEvent(event)
         self.setSceneRect(self.itemsBoundingRect())
         

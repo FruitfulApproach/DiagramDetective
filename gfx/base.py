@@ -75,15 +75,15 @@ class Base(QGraphicsObject):
             return self.scene().ambient_space        
         return parent
     
-    def update(self, rect: QRectF = None, memo: set = None, force=False):
+    def update(self, rect: QRectF = None, memo: set = None, force=False, arrows=True):
         if memo is None:
             memo = set()
-        if id(self) not in memo:
+        if force or id(self) not in memo:
             memo.add(id(self))
             
             if force or self._previousUpdateTime is None or \
                (datetime.now()- self._previousUpdateTime) > self.minimum_update_interval:
-                self._update(rect, memo)
+                self._update(rect, memo, arrows)
                 
                 ancestor = self.parentItem()
                 while ancestor is not None:

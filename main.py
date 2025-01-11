@@ -12,10 +12,8 @@ sys.excepthook = my_exception_hook
 
 if __name__ == '__main__':
     try:            
-        app = QApplication([])
-        
-        initialize_builtins()
-        
+        app = QApplication([])        
+        initialize_builtins()        
         window = QMainWindow()
         view = View()
         window.setCentralWidget(view)
@@ -23,5 +21,8 @@ if __name__ == '__main__':
         view.setScene(scene)    
         window.showMaximized()    
         sys.exit(app.exec_())
+        
     except Exception as e:
         print(e)
+        if __debug__:
+            raise e

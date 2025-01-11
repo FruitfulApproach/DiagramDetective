@@ -278,11 +278,12 @@ class Arrow(Base):
     def source_point(self):
         return self._points[0]
     
-    def _update(self, rect: QRectF, memo: set):
+    def _update(self, rect: QRectF, memo: set, arrows: bool = True):
         self.prepareGeometryChange()
-        self.update_control_point_positions()
+        if arrows:
+            self.update_control_point_positions()
         self.update_shape()
-                
+                         
     def delete(self):
         self.space.delete_arrow(self) 
         self.source = None

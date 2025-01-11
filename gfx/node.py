@@ -27,7 +27,7 @@ class Node(Base):
         
         self.setFlags(
             self.ItemSendsScenePositionChanges|self.ItemSendsGeometryChanges|
-            self.ItemIsMovable|self.ItemIsFocusable|self.ItemIsSelectable
+            self.ItemIsFocusable|self.ItemIsSelectable
         )
         
         self.setAcceptHoverEvents(True)                
@@ -119,9 +119,9 @@ class Node(Base):
     def __repr__(self):
         return f'{self.label}:Node(@{id(self)})'
     
-    def mouseMoveEvent(self, event):
-        self.handle_collisions(event.pos() - event.lastPos())
-        super().mouseMoveEvent(event)
+    #def mouseMoveEvent(self, event):
+        #self.handle_collisions(event.pos() - event.lastPos())
+        #super().mouseMoveEvent(event)
         
     def mouseReleaseEvent(self, event):
         self._clearCollisionMemos()
@@ -161,9 +161,9 @@ class Node(Base):
             
         if change == self.ItemPositionHasChanged:
             self._clearCollisionMemos()            
-            space = self.parent_graph
-            space.update_connecting_arrows(self, set())                        
-            self.scene().update()
+            #space = self.parent_graph
+            ##space.update_connecting_arrows(self, set())                        
+            #self.scene().update()
             
         return super().itemChange(change, value)
             
@@ -198,13 +198,13 @@ class Node(Base):
         else:
             self.setCursor(Qt.ArrowCursor)
             
-        self.update()                         
+        self.update(arrows=False)                         
         super().hoverMoveEvent(event)
         
     def hoverLeaveEvent(self, event):
         self._connectButton.visible = False
         self.setCursor(Qt.ArrowCursor)
-        self.update()
+        self.update(arrows=False)
         super().hoverLeaveEvent(event)
         
     def mousePressEvent(self, event):
@@ -221,11 +221,11 @@ class Node(Base):
     def in_arrow_connect_mode(self):
         return self._connectButton.visible
     
-    def mouseMoveEvent(self, event):
-        space = self.parent_graph
-        #space.update_connecting_arrows(self, set())                        
-        self.scene().update()
-        super().mouseMoveEvent(event)
+    #def mouseMoveEvent(self, event):
+        ##space = self.parent_graph
+        ##self.update(arrows=True)
+        ##self.scene().update()
+        #super().mouseMoveEvent(event)
 
     def closest_boundary_pos_to_item(self, item):
         shape = self.shape()
@@ -273,15 +273,13 @@ class Node(Base):
         path.addRoundedRect(rect, r, r)
         return path
 
-    def _update(self, rect:QRectF, memo: set):
-        from datetime import datetime
-        print(f"({datetime.now()}) Node._update()")
-        space = self.parent_graph
-        space.update_connecting_arrows(self, memo)
+    def _update(self, rect:QRectF, memo: set, arrows: bool = True):
+        if arrows:
+            space = self.parent_graph
+            space.update_connecting_arrows(self, memo)
             
     def setPos(self, pos: QPointF):
         super().setPos(pos)
-        self.update()
-
+        
         
             
