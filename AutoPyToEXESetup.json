@@ -15,7 +15,7 @@
   },
   {
    "optionDest": "console",
-   "value": true
+   "value": false
   },
   {
    "optionDest": "icon_file",
@@ -34,8 +34,16 @@
    "value": false
   },
   {
+   "optionDest": "loglevel",
+   "value": "ERROR"
+  },
+  {
    "optionDest": "debug",
    "value": "all"
+  },
+  {
+   "optionDest": "optimize",
+   "value": "2"
   },
   {
    "optionDest": "strip",

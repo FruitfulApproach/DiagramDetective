@@ -70,15 +70,13 @@ class Scene(QGraphicsScene):
                 item = item.parentItem()
 
             if isinstance(item, Node):
-                r = item.connect_button_rect()
-                p = item.mapFromScene(event.scenePos())
-            
                 if isinstance(item, DirectedGraph):
                     S = item
                     pos = item.mapFromScene(event.scenePos())
                     X = S()
                     X.set_center_pos(pos)
                     X.update()
+                    self.update()
                 else:
                     super().mouseDoubleClickEvent(event)
     
@@ -87,7 +85,7 @@ class Scene(QGraphicsScene):
         item = self.itemAt(event.scenePos(), QTransform())
         
         if event.button() == Qt.LeftButton:                
-            if item is None:
+            if item is None or item is self.ambient_space:
                 for item in self.items():    
                     item.setSelected(False)             # BUGFIX: items were not automatically deselected already... o_o
                 self.update()
@@ -118,9 +116,14 @@ class Scene(QGraphicsScene):
                 if not item.isSelected():
                     if isinstance(item, Label):
                         item = item.parentItem()
-                    for item1 in self.selectedItems():
-                        item1.setSelected(False)
-                    item.setSelected(True)
+                        if not item.isSelected():
+                            for item1 in self.selectedItems():
+                                item1.setSelected(False)
+                            item.setSelected(True)
+                    else:
+                        for item1 in self.selectedItems():
+                            item1.setSelected(False)
+                        item.setSelected(True)
                 
                 self._movingItems = self.selectedItems()
                                               
