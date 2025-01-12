@@ -141,6 +141,7 @@ class Node(Base):
                         if QPointF.dotProduct(item.pos() - self.pos(), delta_pos) > 0:
                             self._collisionMemo.add(id(item))
                             item.setPos(item.pos() + delta_pos)
+                            item.update()
                             
         parent = self.parentItem()        
         if parent is not None and isinstance(parent, Node):

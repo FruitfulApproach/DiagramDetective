@@ -297,6 +297,8 @@ class Arrow(Base):
         self.source = None
         self.target = None
         self.deleteLater()
+        if self.scene():
+            self.scene().update()
         
     def update_shape(self):
         path = self._arrowShape

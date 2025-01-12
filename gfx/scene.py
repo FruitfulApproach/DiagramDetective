@@ -78,6 +78,7 @@ class Scene(QGraphicsScene):
                     pos = item.mapFromScene(event.scenePos())
                     X = S()
                     X.set_center_pos(pos)
+                    X.update()
                 else:
                     super().mouseDoubleClickEvent(event)
     
@@ -85,63 +86,63 @@ class Scene(QGraphicsScene):
         self._mousePressed = True
         item = self.itemAt(event.scenePos(), QTransform())
         
-        if item is None:
-            for item in self.items():    
-                item.setSelected(False)             # BUGFIX: items were not automatically deselected already... o_o
-            self.update()
-        else:
-            if isinstance(item, Node):
-                r = item.connect_button_rect()
-                p = item.mapFromScene(event.scenePos())
-                
-                if item is not self.ambient_space:                    
-                    if len(self.selectedItems()) <= 1 and r.contains(p) and item.in_arrow_connect_mode:
-                        X = item
-                        C = item.parentItem()
-                        
-                        if C is None:
-                            C = self.ambient_space
-                        
-                        a = C(None, X, None)
-                        pos = event.scenePos()
-                        if a.parentItem() is not None:
-                            pos = a.parentItem().mapFromScene(pos)
-                        a.setPos(pos)
-                        a.center_label()
-                        self._placingArrow = a
-                        event.accept()
-                    else:
-                        self._movingItems = self.selectedItems()
-                else:
-                    self._movingItems = self.selectedItems()
+        if event.button() == Qt.LeftButton:                
+            if item is None:
+                for item in self.items():    
+                    item.setSelected(False)             # BUGFIX: items were not automatically deselected already... o_o
+                self.update()
+            else:
+                if isinstance(item, Node):
+                    r = item.connect_button_rect()
+                    p = item.mapFromScene(event.scenePos())
                     
-            elif isinstance(item, Label):
-                item = item.parentItem()
+                    if item is not self.ambient_space:                    
+                        if len(self.selectedItems()) <= 1 and r.contains(p) and item.in_arrow_connect_mode:
+                            X = item
+                            C = item.parentItem()
+                            
+                            if C is None:
+                                C = self.ambient_space
+                            
+                            a = C(None, X, None)
+                            pos = event.scenePos()
+                            if a.parentItem() is not None:
+                                pos = a.parentItem().mapFromScene(pos)
+                            a.setPos(pos)
+                            a.center_label()
+                            self._placingArrow = a
+                            event.accept()
+                            self.update()
+                            return
+    
                 if not item.isSelected():
+                    if isinstance(item, Label):
+                        item = item.parentItem()
                     for item1 in self.selectedItems():
                         item1.setSelected(False)
                     item.setSelected(True)
+                
                 self._movingItems = self.selectedItems()
-                                          
-            if self._movingItems:
-                for item in list(self._movingItems):
-                    if isinstance(item, Label):
-                        parent = item.parentItem()
-                        if isinstance(parent, Node):
-                            if parent not in self._movingItems:
-                                self._movingItems.append(parent)
-                        self._movingItems.remove(item)                    
-                                    
-                    if isinstance(item, Arrow):
-                        if item.source in self._movingItems and item.target in self._movingItems:
-                            self._moveItemsMemo.add(id(item))
-                        else:
-                            self._movingItems.remove(item)
-                            item.setSelected(False)
-                            
-                self._movingItems = list(filter(lambda i: not any(j.isAncestorOf(i) for j in self._movingItems), self._movingItems))
-                            
-                event.accept()             
+                                              
+                if self._movingItems:
+                    for item in list(self._movingItems):
+                        if isinstance(item, Label):
+                            parent = item.parentItem()
+                            if isinstance(parent, Node):
+                                if parent not in self._movingItems:
+                                    self._movingItems.append(parent)
+                            self._movingItems.remove(item)                    
+                                        
+                        if isinstance(item, Arrow):
+                            if item.source in self._movingItems and item.target in self._movingItems:
+                                self._moveItemsMemo.add(id(item))
+                            else:
+                                self._movingItems.remove(item)
+                                item.setSelected(False)
+                                
+                    self._movingItems = list(filter(lambda i: not any(j.isAncestorOf(i) for j in self._movingItems), self._movingItems))
+                                
+                    event.accept()             
         super().mousePressEvent(event)
         
     def mouseMoveEvent(self, event):
@@ -213,6 +214,7 @@ class Scene(QGraphicsScene):
                         break
         
             if item is None:
+                self.update()
                 a.delete()
             else:
                 if isinstance(item, Node) and not self.arrow_cant_connect_target(a, item):
