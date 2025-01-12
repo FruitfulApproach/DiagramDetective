@@ -193,7 +193,6 @@ class Arrow(Base):
     def update_control_point_positions(self):
         if not self._updatingPointPos:
             self._updatingPointPos = True
-            self.prepareGeometryChange()
             source = self.source_or_point
             target = self.target_or_point
 
@@ -214,13 +213,15 @@ class Arrow(Base):
                 else:
                     return
 
-            if self._target is not None:
-                self.target_point.setPos(b) 
-            if self._source is not None:
-                self.source_point.setPos(a) 
-
-            #if not self.is_bezier_curve:
-                #self.set_line_points(a, b)
+            if not self.is_bezier_curve:
+                print("a=", a)
+                print("b=", b)
+                self.set_line_points(a, b)
+            else:
+                if self._source is not None:
+                    self.source_point.setPos(a)
+                if self._target is not None:
+                    self.target_point.setPos(b)                     
 
             self.update_text_position()
             self._updatingPointPos = False
@@ -371,7 +372,9 @@ class Arrow(Base):
         a = u.length()
         a /= (len(self._points) - 1)
         u.normalize()
-        for k in range(0, len(self._points)):
+        self._points[0].setPos(pos0)
+        self._points[-1].setPos(pos1)
+        for k in range(1, len(self._points)-1):
             self._points[k].setPos(pos0 + k*a*u.toPointF())
             
     def center_label(self):

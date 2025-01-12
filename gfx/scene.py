@@ -150,9 +150,8 @@ class Scene(QGraphicsScene):
             a = self._placingArrow
             pos = a.mapFromScene(event.scenePos())
             a.target_point.setPos(pos)
-            #a.set_line_points()
             a.center_label()
-            a.update()
+            a.update_shape()                # BUG HACKFIX, don't call a.update() here, for some reason the length of the arrow doubles!
             self.update()
             event.accept()
         else:

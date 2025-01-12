@@ -266,6 +266,7 @@ class Node(Base):
                 return QPointF(x, y)
 
             return closest_point_on_path(self.mapFromItem(item, item.boundingRect().center()), shape)
+        
     
     def shape(self):
         path = QPainterPath()
