@@ -23,8 +23,6 @@ ScriptsTable = AsciiLetters.maketrans(AsciiLetters, Scripts)
 BoldScripts = ''.join([chr(x) for x in range(Script_A_Bold, Script_z_Bold + 1)])
 BoldScriptsTable = AsciiLetters.maketrans(AsciiLetters, BoldScripts)
 ScriptsTable['F'] = 0x2131
-print(ScriptsTable['F'])
-print(ScriptsTable)
 
 def ascii_letters_to_script(ascii_letters: str, bold: bool = False) -> str:
     if not bold:

@@ -153,8 +153,9 @@ class DirectedGraph(Object):
         while var in self._arrowsByLabel:
             var = next_ascii_prime_variable(var)
         return var
-
             
-            
+    def copy(self):
+        X = DirectedGraph(label=self.label, node_type=self.node_type, arrow_type=self.arrow_type)
+        return X            
         
         

@@ -82,7 +82,10 @@ class Arrow(Base):
         return self._target
     
     @source.setter
-    def source(self, source):        
+    def source(self, source):
+        self.set_source(source)
+        
+    def set_source(self, source: Node):
         from gfx.directed_graph import DirectedGraph
         
         prev_node = self._source
@@ -96,7 +99,10 @@ class Arrow(Base):
             self.setZValue(source.zValue() - 1)
                 
     @target.setter
-    def target(self, target):
+    def target(self, target: Node):
+        self.set_target(target)
+        
+    def set_target(self, target: Node):
         from gfx.directed_graph import DirectedGraph
         
         prev_node = self._target
@@ -214,8 +220,6 @@ class Arrow(Base):
                     return
 
             if not self.is_bezier_curve:
-                print("a=", a)
-                print("b=", b)
                 self.set_line_points(a, b)
             else:
                 if self._source is not None:

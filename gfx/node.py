@@ -13,7 +13,7 @@ class Node(Base):
     selection_shape_pad = 3   
     position_changed = pyqtSignal(QPointF)   # Sends delta
     
-    default_border_pen = Pen(QColor(76, 235, 52, 150), 3.0)
+    default_border_pen = Pen(Qt.blue, 3.0)
     default_fill_brush = QBrush(SimpleBrush(QColor(255, 255, 0, 150)))
     default_corner_radius = 11.0
         
