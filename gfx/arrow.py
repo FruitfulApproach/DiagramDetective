@@ -345,10 +345,6 @@ class Arrow(Base):
         for point in self._points:
             point.setVisible(False)
         
-    def contextMenuEvent(self, event):
-        menu = self._buildContextMenu(event)
-        menu.exec_(event.screenPos())
-        
     def _buildContextMenu(self, event):
         menu = QMenu()
         menu.addAction(f"Delete arrow {self.label}").triggered.connect(self.delete)

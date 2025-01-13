@@ -106,3 +106,10 @@ class Base(QGraphicsObject):
             
     def _selectionShape(self):
         raise NotImplementedError
+    
+    def contextMenuEvent(self, event):
+        menu = self._buildContextMenu(event)
+        menu.exec_(event.screenPos())
+        
+    def _buildContextMenu(self, event):
+        raise NotImplementedError
