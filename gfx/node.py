@@ -23,7 +23,7 @@ class Node(Base):
         self._lastPos = self.pos()
         self._collisionMemo = set()
         self._connectButton = ConnectButton()
-        self._connectButton.visible = False
+        self._connectButton.set_visible(False)
         
         self.setFlags(
             self.ItemSendsScenePositionChanges|self.ItemSendsGeometryChanges|
@@ -48,30 +48,24 @@ class Node(Base):
         self._pen = data['pen']
         self._brush = data['brush']
         
-    @property
     def corner_radius(self):
         return self._cornerRadius
-    
-    @corner_radius.setter
-    def corner_radius(self, radius: float):
+
+    def set_corner_radius(self, radius: float):
         self._cornerRadius = radius
         self.update()
     
-    @property
     def border_pen(self):
         return self._pen
-    
-    @border_pen.setter
-    def border_pen(self, pen: QPen):
+
+    def set_border_pen(self, pen: QPen):
         self._pen = pen
         self.update()
         
-    @property
     def fill_brush(self):
         return self._brush
     
-    @fill_brush.setter
-    def fill_brush(self, brush: QBrush):
+    def set_fill_brush(self, brush: QBrush):
         self._brush = brush
         self.update()   
         
@@ -90,7 +84,7 @@ class Node(Base):
         return memo[id(self)]
     
     def copy(self):
-        X = Node(label=self.label)
+        X = Node(label=self.label())
         return X
         
     def boundingRect(self) -> QRectF:
@@ -106,18 +100,18 @@ class Node(Base):
     
     def paint(self, painter, option, widget):
         painter.setRenderHint(painter.Antialiasing)
-        painter.setBrush(self.fill_brush)
-        painter.setPen(self.border_pen)
-        r = self.corner_radius
+        painter.setBrush(self.fill_brush())
+        painter.setPen(self.border_pen())
+        r = self.corner_radius()
         painter.drawRoundedRect(self.childrenBoundingRect(), r, r)
                     
-        if self._connectButton.visible:
+        if self._connectButton.visible():
             self._connectButton.paint(painter)
 
         super().paint(painter, option, widget)            
         
     def __repr__(self):
-        return f'{self.label}:Node(@{id(self)})'
+        return f'{self.label()}:Node(@{id(self)})'
     
     #def mouseMoveEvent(self, event):
         #self.handle_collisions(event.pos() - event.lastPos())
@@ -186,15 +180,15 @@ class Node(Base):
         
         if r_outer.contains(event.pos()):
             if not r_inner.contains(event.pos()):
-                self._connectButton.pos = event.pos()
-                if not self._connectButton.visible:
-                    self._connectButton.visible = True
+                self._connectButton.set_pos(event.pos())
+                if not self._connectButton.visible():
+                    self._connectButton.set_visible(True)
             else:
-                self._connectButton.visible = False
+                self._connectButton.set_visible(False)
         else:
-            self._connectButton.visible = False
+            self._connectButton.set_visible(False)
         
-        if self._connectButton.visible:
+        if self._connectButton.visible():
             self.setCursor(Qt.UpArrowCursor)
         else:
             self.setCursor(Qt.ArrowCursor)
@@ -203,13 +197,13 @@ class Node(Base):
         super().hoverMoveEvent(event)
         
     def hoverLeaveEvent(self, event):
-        self._connectButton.visible = False
+        self._connectButton.set_visible(False)
         self.setCursor(Qt.ArrowCursor)
         self.update(arrows=False)
         super().hoverLeaveEvent(event)
         
     def mousePressEvent(self, event):
-        self._connectButton.visible = False
+        self._connectButton.set_visible(False)
         super().mousePressEvent(event)
         
     def focusOutEvent(self, event):
@@ -217,10 +211,10 @@ class Node(Base):
         super().focusOutEvent(event)
         
     def connect_button_rect(self):
-        return self._connectButton.rect
+        return self._connectButton.rect()
     
     def in_arrow_connect_mode(self):
-        return self._connectButton.visible
+        return self._connectButton.visible()
     
     #def mouseMoveEvent(self, event):
         ##space = self.parent_graph
@@ -271,13 +265,13 @@ class Node(Base):
     def shape(self):
         path = QPainterPath()
         rect = self.childrenBoundingRect()
-        r = self.corner_radius
+        r = self.corner_radius()
         path.addRoundedRect(rect, r, r)
         return path
 
     def _update(self, rect:QRectF, memo: set, arrows: bool = True):
         if arrows:
-            space = self.parent_graph
+            space = self.parent_graph()
             space.update_connecting_arrows(self, memo)
             
     def setPos(self, pos: QPointF):

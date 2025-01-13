@@ -34,9 +34,8 @@ class Scene(QGraphicsScene):
             
     def finish_setup(self):
         self.setFont(QFont("Serif", 23))
-        self.ambient_space.setFlag(self.ambient_space.ItemIsSelectable, False)
+        self.ambient_space().setFlag(self.ambient_space().ItemIsSelectable, False)
            
-    @property
     def ambient_space(self):
         return self._ambientSpace
     
@@ -50,7 +49,7 @@ class Scene(QGraphicsScene):
         #painter.setRenderHint(painter.Antialiasing)
         #painter.setFont(self.font())
         #painter.setPen(QPen(Qt.black, 1.0))   # TODO: implement text_color in base; then here grab it from ambient_space
-        #painter.drawText(QPointF(), self.ambient_space.label)
+        #painter.drawText(QPointF(), self.ambient_space.label())
         
     def mouseDoubleClickEvent(self, event):
         if self._placingArrow:
@@ -61,7 +60,7 @@ class Scene(QGraphicsScene):
         item = self.itemAt(event.scenePos(), QTransform())
         
         if item is None:
-            S = self.ambient_space
+            S = self.ambient_space()
             pos = event.scenePos()
             X = S()
             X.set_center_pos(pos)
@@ -85,7 +84,7 @@ class Scene(QGraphicsScene):
         item = self.itemAt(event.scenePos(), QTransform())
         
         if event.button() == Qt.LeftButton:                
-            if item is None or item is self.ambient_space:
+            if item is None or item is self.ambient_space():
                 for item in self.items():    
                     item.setSelected(False)             # BUGFIX: items were not automatically deselected already... o_o
                 self.update()
@@ -94,13 +93,13 @@ class Scene(QGraphicsScene):
                     r = item.connect_button_rect()
                     p = item.mapFromScene(event.scenePos())
                     
-                    if item is not self.ambient_space:                    
+                    if item is not self.ambient_space():                    
                         if len(self.selectedItems()) <= 1 and r.contains(p) and item.in_arrow_connect_mode:
                             X = item
                             C = item.parentItem()
                             
                             if C is None:
-                                C = self.ambient_space
+                                C = self.ambient_space()
                             
                             a = C(None, X, None)
                             pos = event.scenePos()
@@ -137,7 +136,7 @@ class Scene(QGraphicsScene):
                             self._movingItems.remove(item)                    
                                         
                         if isinstance(item, Arrow):
-                            if item.source in self._movingItems and item.target in self._movingItems:
+                            if item.source() in self._movingItems and item.target in self._movingItems:
                                 self._moveItemsMemo.add(id(item))
                             else:
                                 self._movingItems.remove(item)
@@ -152,7 +151,7 @@ class Scene(QGraphicsScene):
         if self._placingArrow:
             a = self._placingArrow
             pos = a.mapFromScene(event.scenePos())
-            a.target_point.setPos(pos)
+            a.target_point().setPos(pos)
             a.center_label()
             a.update_shape()                # BUG HACKFIX, don't call a.update() here, for some reason the length of the arrow doubles!
             self.update()
@@ -168,22 +167,7 @@ class Scene(QGraphicsScene):
                     item.update(memo=memo, arrows=True)
                     
                 self.update()
-                    
-                    #if isinstance(item, Node):
-                        #space: DirectedGraph = item.parent_graph
-                        
-                        #for arrow in space.arrows_from(item):
-                            #arrow.update(memo=memo)
-                            
-                        #for arrow in space.arrows_to(item):
-                            #arrow.update(memo=memo)
-                        
-                        #parent = item
-                        #while (parent := parent.parentItem()) is not None:
-                            #parent.update(memo=memo)
-                        
-                        #self.ambient_space.update(memo=memo)
-                                 
+
         super().mouseMoveEvent(event)
         
     def mouseReleaseEvent(self, event):
@@ -206,7 +190,7 @@ class Scene(QGraphicsScene):
             item = None
             
             for item in items:                
-                if item not in (a, a.target_point, a.source_point):
+                if item not in (a, a.target_point(), a.source_point()):
                     while (not isinstance(item, Node)) or self.arrow_cant_connect_target(a, item):
                         item = item.parentItem()
                         
@@ -220,7 +204,7 @@ class Scene(QGraphicsScene):
                 a.delete()
             else:
                 if isinstance(item, Node) and not self.arrow_cant_connect_target(a, item):
-                    a.target = item
+                    a.set_target(item)
                     a.center_label()
                     a.update(force=True)
                 else:
@@ -234,6 +218,6 @@ class Scene(QGraphicsScene):
         super().mouseReleaseEvent(event)
         
     def arrow_cant_connect_target(self, arrow: Arrow, node: Node) -> bool:
-        space = arrow.parent_graph
+        space = arrow.parent_graph()
         return space.arrow_cant_connect_target(arrow, node)
         

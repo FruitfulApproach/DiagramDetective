@@ -6,19 +6,16 @@ class Morphism(Arrow):
         super().__init__(label, dom, cod, pickled)
         self._supposedlyEpic = False
         
-    @property
     def category(self):
-        return self.parent_graph
+        return self.parent_graph()
     
     def copy(self):
-        f = Morphism(label=self.label, dom=self.dom, cod=self.cod)
+        f = Morphism(label=self.label(), dom=self.dom(), cod=self.cod())
         return f
     
-    @property
     def dom(self):
-        return self.source
+        return self.source()
     
-    @property
     def cod(self):
         return self.target
     
@@ -40,6 +37,5 @@ class Morphism(Arrow):
             self._headStyle = self.SingleHead
         self.update()
         
-    @property
     def is_supposedly_epic(self):
         return self._supposedlyEpic

@@ -20,7 +20,7 @@ class Label(QGraphicsTextItem):
     
     def __getstate__(self):
         return {
-            'text' : self.text,
+            'text' : self.text(),
         }
     
     def finish_setup(self):
@@ -34,19 +34,17 @@ class Label(QGraphicsTextItem):
         return memo[id(self)]
     
     def copy(self):
-        l = Label(text=self.text)
+        l = Label(text=self.text())
         return l
     
-    @property
     def text(self):
         return self.toPlainText()
     
-    @text.setter
-    def text(self, text: str):
+    def set_text(self, text: str):
         self.setPlainText(text)
         
     def __repr__(self):
-        return f'{self.text}:Label(@{id(self)})'
+        return f'{self.text()}:Label(@{id(self)})'
     
     def contextMenuEvent(self, event):
         menu = QMenu()

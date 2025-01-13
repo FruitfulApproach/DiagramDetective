@@ -38,25 +38,23 @@ class Semicategory(DirectedGraph):
         return memo[id(self)]
     
     def copy(self):
-        X = Semicategory(label=self.label, objects=self.object_type, morphisms=self.morphism_type)
+        X = Semicategory(label=self.label(), objects=self.object_type(), morphisms=self.morphism_type())
         return X
     
-    @property
     def morphism_type(self):
-        return self.arrow_type
-    
-    @property
+        return self.arrow_type()
+
     def object_type(self):
-        return self.node_type
+        return self.node_type()
     
     def _arrowCantConnect(self, arrow: Arrow, node: Node, other_end: Node):
-        if not isinstance(arrow, self.arrow_type.__class__):
+        if not isinstance(arrow, self.arrow_type().__class__):
             return True
-        if not isinstance(node, self.node_type.__class__):
+        if not isinstance(node, self.node_type().__class__):
             return True
-        if not isinstance(other_end, self.node_type.__class__):
+        if not isinstance(other_end, self.node_type().__class__):
             return True
-        if other_end.category is not node.category:
+        if other_end.category() is not node.category():
             return True
         return super()._arrowCantConnect(arrow, node, other_end)               
         

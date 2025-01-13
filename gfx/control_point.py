@@ -52,12 +52,10 @@ class ControlPoint(QGraphicsEllipseItem):
             return self._innerRect.center()
         return v / mag * radius
     
-    @property
     def radius(self):
         return self._radius    
 
-    @radius.setter
-    def radius(self, radius):
+    def set_radius(self, radius):
         self._radius = radius
         r = radius
         self.setRect(-r, -r, 2*r, 2*r)

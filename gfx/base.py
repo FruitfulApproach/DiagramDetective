@@ -43,36 +43,25 @@ class Base(QGraphicsObject):
         return memo[id(self)]
     
     def copy(self):
-        n = Base(label=self.label)
+        n = Base(label=self.label())
         return n
     
-    @property
     def label(self):
-        return self._label.text
+        return self._label.text()
     
-    @label.setter
-    def label(self, label: str):
-        self._label.text = label
+    def set_label(self, label: str):
+        self._label.set_text(label)
     
-    @property
     def label_item(self):
         return self._label
-        
-    @property
-    def space(self):
-        parent = self.parentItem()
-        if parent is None:
-            return self.scene().ambient_space
-        return parent
-        
+              
     def __repr__(self):
-        return f'{self.text}:Base(@{id(self)}'
+        return f'{self.text()}:Base(@{id(self)}'
     
-    @property
     def parent_graph(self):
         parent = self.parentItem()        
         if parent is None:
-            return self.scene().ambient_space        
+            return self.scene().ambient_space()     
         return parent
     
     def update(self, rect: QRectF = None, memo: set = None, force=False, arrows=True):
@@ -87,7 +76,7 @@ class Base(QGraphicsObject):
                 
                 ancestor = self.parentItem()
                 while ancestor is not None:
-                    ancestor.update(rect, memo)
+                    ancestor.update(rect, memo, force, arrows)
                     ancestor = ancestor.parentItem()
                     
                 if rect is None:

@@ -29,7 +29,7 @@ class Arrow(Base):
         self._arrowShape = QPainterPath()
         self._pointVisTimer = None
         
-        self.label_item.setFlags(self.label_item.flags() | self.ItemIsMovable)
+        self.label_item().setFlags(self.label_item().flags() | self.ItemIsMovable)
         self.setFlags(self.ItemIsSelectable | self.ItemIsFocusable)
         self.setAcceptHoverEvents(True)
         
@@ -63,51 +63,41 @@ class Arrow(Base):
     def __deepcopy__(self, memo):
         if id(self) not in memo:
             f = self.copy()
-            f.source = deepcopy(self.source, memo)
-            f.target = deepcopy(self.target, memo)
+            f.set_source(deepcopy(self.source(), memo))
+            f.set_target(deepcopy(self.target(), memo))
             memo[id(self)] = f
             return f
         return memo[id(self)]
     
     def copy(self):
-        f = Arrow(label=self.label, source=self.source, target=self.target)
+        f = Arrow(label=self.label(), source=self.source(), target=self.target())
         return f
     
-    @property
     def source(self):
         return self._source
     
-    @property
     def target(self):
         return self._target
     
-    @source.setter
-    def source(self, source):
-        self.set_source(source)
-        
     def set_source(self, source: Node):
         from gfx.directed_graph import DirectedGraph
         
         prev_node = self._source
         self._source = source
-        space = self.parent_graph
+        space = self.parent_graph()
         
         if isinstance(space, DirectedGraph):
             space.arrow_source_was_set(self, prev_node)
         
         if source is not None:
             self.setZValue(source.zValue() - 1)
-                
-    @target.setter
-    def target(self, target: Node):
-        self.set_target(target)
-        
+                       
     def set_target(self, target: Node):
         from gfx.directed_graph import DirectedGraph
         
         prev_node = self._target
         self._target = target
-        space = self.parent_graph
+        space = self.parent_graph()
         
         if isinstance(space, DirectedGraph):
             space.arrow_target_was_set(self, prev_node)
@@ -117,23 +107,23 @@ class Arrow(Base):
                     
     def boundingRect(self):
         h = self.head_size() / 2 + self._intersectShapeWidth() / 2
-        rect_list = [self.label_item.boundingRect().translated(self.label_item.pos())]
+        rect_list = [self.label_item().boundingRect().translated(self.label_item().pos())]
         
-        if self.is_bezier_curve:
-            for point in self.control_points:
+        if self.is_bezier_curve():
+            for point in self.control_points():
                 rect_list.append(point.boundingRect().translated(point.pos()))
         else:
-            rect_list.append(self.source_point.boundingRect().translated(self.source_point.pos()))
-            rect_list.append(self.target_point.boundingRect().translated(self.target_point.pos()))
+            rect_list.append(self.source_point().boundingRect().translated(self.source_point().pos()))
+            rect_list.append(self.target_point().boundingRect().translated(self.target_point().pos()))
             
         return min_bounding_rect(rect_list).adjusted(-h, -h, h, h)
     
     def head_size(self):
-        return self._relativeHeadSize * self.pen.widthF()
+        return self._relativeHeadSize * self.pen().widthF()
     
     def compute_head_path(self):
         line = self.line()
-        if not self.is_bezier_curve:
+        if not self.is_bezier_curve():
             u = line.p2() - line.p1()
         else:
             u = self._points[-1].pos() - self._points[-2].pos()   
@@ -168,12 +158,12 @@ class Arrow(Base):
             perp_end = 1.5 * v
             path.moveTo(line_end + perp_end)
             path.cubicTo(line.p1() + perp_end, line.p1(), line_end)
-            if self.is_bezier_curve:
+            if self.is_bezier_curve():
                 path.cubicTo(self._points[1].pos(), self._points[2].pos(), self._points[3].pos())
             else:
                 path.lineTo(self.line().p2())        
         else:
-            if not self.is_bezier_curve:
+            if not self.is_bezier_curve():
                 path.moveTo(self.line().p1())
                 path.lineTo(self.line().p2())
             else:
@@ -182,7 +172,7 @@ class Arrow(Base):
         return path
     
     def tail_line(self):
-        if self.is_bezier_curve:
+        if self.is_bezier_curve():
             return QLineF(self._points[0].pos(), self._points[1].pos())
         return QLineF(self._points[0].pos(), self._points[-1].pos())
     
@@ -192,17 +182,16 @@ class Arrow(Base):
     def line(self) -> QLineF:
         return QLineF(self._points[0].pos(), self._points[-1].pos())
     
-    @property
     def is_bezier_curve(self):
         return self._bezier
     
     def update_control_point_positions(self):
         if not self._updatingPointPos:
             self._updatingPointPos = True
-            source = self.source_or_point
-            target = self.target_or_point
+            source = self.source_or_point()
+            target = self.target_or_point()
 
-            if not self.is_bezier_curve:
+            if not self.is_bezier_curve():
                 a = source.closest_boundary_pos_to_item(target)
                 b = target.closest_boundary_pos_to_item(source)
                 if a is not None and b is not None:
@@ -219,13 +208,13 @@ class Arrow(Base):
                 else:
                     return
 
-            if not self.is_bezier_curve:
+            if not self.is_bezier_curve():
                 self.set_line_points(a, b)
             else:
                 if self._source is not None:
-                    self.source_point.setPos(a)
+                    self.source_point().setPos(a)
                 if self._target is not None:
-                    self.target_point.setPos(b)                     
+                    self.target_point().setPos(b)                     
 
             self.update_text_position()
             self._updatingPointPos = False
@@ -245,49 +234,42 @@ class Arrow(Base):
         self._lastLabelPosLine = line    
             
     def label_pos_line(self):
-        if not self.is_bezier_curve:
+        if not self.is_bezier_curve():
             line = QLineF(self._points[0].pos(), self._points[-1].pos())    
         else:
             line = QLineF(self._points[1].pos(), self._points[-2].pos())
         return line            
             
-    @property
     def pen(self):
         return self._linePen
     
-    @pen.setter
-    def pen(self, pen: Pen):
+    def set_pen(self, pen: Pen):
         self._linePen = pen
         self.update()
         
     def paint(self, painter, option, widget):
         painter.setRenderHint(painter.Antialiasing)
         #painter.drawRect(self.boundingRect())
-        painter.setPen(self.pen)
+        painter.setPen(self.pen())
         painter.drawPath(self._arrowShape)        
         super().paint(painter, option, widget)
 
-    @property
     def source_or_point(self):
         if self._source is None:
-            return self.source_point
+            return self.source_point()
         return self._source
 
-    @property
     def target_or_point(self):
         if self._target is None:
-            return self.target_point
+            return self.target_point()
         return self._target    
 
-    @property
     def target_point(self):
         return self._points[-1]
 
-    @property
     def source_point(self):
         return self._points[0]
     
-    @property
     def control_points(self) -> list:
         return self._points
     
@@ -298,9 +280,9 @@ class Arrow(Base):
         self.update_shape()
                          
     def delete(self):
-        self.space.delete_arrow(self) 
-        self.source = None
-        self.target = None
+        self.parent_graph().delete_arrow(self) 
+        self.set_source(None)
+        self.set_target(None)
         self.deleteLater()
         if self.scene():
             self.scene().update()
@@ -319,7 +301,7 @@ class Arrow(Base):
         self._shape = stroker.createStroke(path)
         
     def _intersectShapeWidth(self):
-        return self.pen.width() * self.intersect_shape_width_multiple
+        return self.pen().widthF() * self.intersect_shape_width_multiple
                 
     def shape(self):
         return self._shape    
@@ -328,7 +310,7 @@ class Arrow(Base):
         return self.shape()
     
     def hoverEnterEvent(self, event):
-        if self.is_bezier_curve:
+        if self.is_bezier_curve():
             for point in self._points[1:-1]:
                 point.setVisible(True)  
         super().hoverEnterEvent(event)
@@ -347,19 +329,19 @@ class Arrow(Base):
         
     def _buildContextMenu(self, event):
         menu = QMenu()
-        menu.addAction(f"Delete arrow {self.label}").triggered.connect(self.delete)
+        menu.addAction(f"Delete arrow {self.label()}").triggered.connect(self.delete)
         menu.addSeparator()
         action = menu.addAction("Bezier curve")
         action.setCheckable(True)
-        action.setChecked(self.is_bezier_curve)
+        action.setChecked(self.is_bezier_curve())
         action.triggered.connect(lambda b: self.toggle_bezier())
         return menu
             
     def toggle_bezier(self, toggled=None):
         if toggled is None:
-            toggled = not self.is_bezier_curve
+            toggled = not self.is_bezier_curve()
             
-        if toggled != self.is_bezier_curve:
+        if toggled != self.is_bezier_curve():
             self._bezier = toggled
             self._points[1].setVisible(toggled)
             self._points[2].setVisible(toggled)
@@ -378,7 +360,7 @@ class Arrow(Base):
             self._points[k].setPos(pos0 + k*a*u.toPointF())
             
     def center_label(self):
-        self.label_item.setPos((self._points[0].pos() + self._points[-1].pos()) / 2)
+        self.label_item().setPos((self._points[0].pos() + self._points[-1].pos()) / 2)
         
     def show_control_points_longer(self):
         if self._pointVisTimer is not None:

@@ -10,13 +10,12 @@ class Object(node.Node):
     def finish_setup(self):
         pass        
     
-    @property
     def category(self):
-        return self.parent_graph
+        return self.parent_graph()
     
     def copy(self):
-        X = Object(label=self.label)
+        X = Object(label=self.label())
         return X
     
     def __repr__(self):
-        return f'{self.label}:Object(@{id(self)})'    
+        return f'{self.label()}:Object(@{id(self)})'    
