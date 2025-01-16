@@ -1,7 +1,7 @@
 from gfx.base import Base
 from gfx.node import Node
 from copy import deepcopy
-from PyQt5.QtCore import QPointF, QLineF, Qt, QRectF, QTimer
+from PyQt5.QtCore import QPointF, QLineF, Qt, QRectF, QTimer, pyqtSignal
 from PyQt5.QtGui import QPainterPath, QVector2D, QPainterPathStroker
 from gfx.control_point import ControlPoint
 from core.qt_pickle_utility import Pen
@@ -10,6 +10,8 @@ from gfx.label import Label
 from core.utility import min_bounding_rect
 
 class Arrow(Base):
+    bezier_toggled = pyqtSignal(bool)
+    
     default_relative_head_size = 5.0
     intersect_shape_width_multiple = 5.0
     control_point_visible_time = 5000
@@ -29,7 +31,8 @@ class Arrow(Base):
         self._arrowShape = QPainterPath()
         self._pointVisTimer = None
         
-        self.label_item().setFlags(self.label_item().flags() | self.ItemIsMovable)
+        if self.label_item():                
+            self.label_item().setFlags(self.label_item().flags() | self.ItemIsMovable)
         self.setFlags(self.ItemIsSelectable | self.ItemIsFocusable)
         self.setAcceptHoverEvents(True)
         
@@ -70,7 +73,9 @@ class Arrow(Base):
         return memo[id(self)]
     
     def copy(self):
-        f = Arrow(label=self.label(), source=self.source(), target=self.target())
+        f = Arrow(label=None, source=self.source(), target=self.target())
+        if self._label:
+            f._label = self._label.copy()
         return f
     
     def source(self):
@@ -334,13 +339,10 @@ class Arrow(Base):
         action = menu.addAction("Bezier curve")
         action.setCheckable(True)
         action.setChecked(self.is_bezier_curve())
-        action.triggered.connect(lambda b: self.toggle_bezier())
+        action.toggled.connect(self.toggle_bezier)
         return menu
             
-    def toggle_bezier(self, toggled=None):
-        if toggled is None:
-            toggled = not self.is_bezier_curve()
-            
+    def toggle_bezier(self, toggled:bool, emit: bool=True):        
         if toggled != self.is_bezier_curve():
             self._bezier = toggled
             self._points[1].setVisible(toggled)
@@ -348,6 +350,8 @@ class Arrow(Base):
             if not toggled:
                 self.set_line_points(self._points[0].pos(), self._points[-1].pos())
                 self.update()
+            if emit:
+                self.bezier_toggled.emit(toggled)    
                 
     def set_line_points(self, pos0, pos1):
         u = QVector2D(pos1 - pos0)

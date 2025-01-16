@@ -1,20 +1,30 @@
-from PyQt5.QtWidgets import QGraphicsObject
+from PyQt5.QtWidgets import QGraphicsObject, QGraphicsItem
 from gfx.label import Label
-from PyQt5.QtCore import QRectF, Qt
+from PyQt5.QtCore import QRectF, Qt, pyqtSignal, QPointF
 from core.utility import simple_max_contrasting_color
 from PyQt5.QtGui import QPen
 from datetime import datetime, timedelta
 
 class Base(QGraphicsObject):
+    position_changing = pyqtSignal(QPointF)   # Sends delta
+    position_changed = pyqtSignal(QPointF)    # "
+    mouse_moved = pyqtSignal(QPointF)  # Sends delta
+    adding_child = pyqtSignal(QGraphicsItem)
+    removing_child = pyqtSignal(QGraphicsItem)
+    
     minimum_update_interval = timedelta(milliseconds=25)
     
     def __init__(self, label: str = None, pickled=False):
         super().__init__()
         
+        self._posChangingMemo = set()
         self._previousUpdateTime = None
         
         if not pickled:
-            self._label = Label(label)
+            if label is not None:
+                self._label = Label(label)
+            else:
+                self._label = None
             Base.finish_setup(self)
             
     def __setstate__(self, data):
@@ -34,7 +44,8 @@ class Base(QGraphicsObject):
         return data
         
     def finish_setup(self):
-        self._label.setParentItem(self)
+        if self._label:
+            self._label.setParentItem(self)
         
     def __deepcopy__(self, memo: dict):
         if id(self) not in memo:
@@ -102,3 +113,12 @@ class Base(QGraphicsObject):
         
     def _buildContextMenu(self, event):
         raise NotImplementedError
+    
+    def setPos(self, pos: QPointF):
+        if pos != self.pos():        
+            super().setPos(pos)
+            
+    def delete(self):
+        raise NotImplementedError
+
+  

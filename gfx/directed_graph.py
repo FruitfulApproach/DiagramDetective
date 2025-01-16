@@ -2,13 +2,16 @@ from gfx.arrow import Arrow
 from gfx.node import Node
 from mathlib.object import Object
 from core.unicode_utility import next_ascii_prime_variable
+from gfx.base import Base
 
 class DirectedGraph(Object):
     node_label_start = 'A'
     arrow_label_start = 'a'
     
     def __init__(self, label: str = None, node_type: Node = None, arrow_type: Arrow = None, pickled=False):
-        super().__init__(label, pickled)
+        self._addingChildMemo = set()
+        self._removingChildMemo = set()        
+        super().__init__(label, pickled)       
         self._nodes = {}    # Keyed by id()
         self._arrows = {}
         self._nodesByLabel = {}
@@ -124,6 +127,21 @@ class DirectedGraph(Object):
             if len(to_node[i]) == 0:
                 del to_node[i]
                 
+    def delete_node(self, n: Node):
+        for arrow in self.arrows_from(n):
+            arrow.delete()
+        for arrow in self.arrows_to(n):
+            arrow.delete()        
+        n.setParentItem(None)
+        l = n.label()
+        by_label = self._nodesByLabel
+        if l in by_label:
+            if n in by_label[l]:
+                by_label[l].remove(n)
+        i = id(n)
+        if i in self._nodes:
+            del self._nodes[i]      
+                        
     def arrow_cant_connect_target(self, arrow: Arrow, target: Node) -> bool:
         return self._arrowCantConnect(arrow, target, arrow.source())
     
@@ -153,4 +171,30 @@ class DirectedGraph(Object):
         X = DirectedGraph(label=self.label(), node_type=self.node_type(), arrow_type=self.arrow_type())
         return X            
         
+    def itemChange(self, change, value):
+        if change == self.ItemChildAddedChange:
+            self.adding_child.emit(value)
+        elif change == self.ItemChildRemovedChange:
+            self.removing_child.emit(value)
+        return super().itemChange(change, value)
+        
+    #def connected_component(self, item: Base, component: dict = None):
+        #assert isinstance(item, (Node, Arrow))
+        
+        #if component is None:
+            #component = {}
+            
+        #if id(item) not in component:
+            #component[id(item)] = item
+            
+            #if isinstance(item, Node):
+                #for arrow in self.arrows_from(item):
+                    #self.connected_component(arrow, component)
+                #for arrow in self.arrows_to(item):
+                    #self.connected_component(arrow, component)
+            #else:
+                #self.connected_component(item.target(), component)
+                #self.connected_component(item.source(), component)
+            
+        #return component
         

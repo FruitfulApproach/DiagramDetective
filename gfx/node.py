@@ -11,7 +11,6 @@ class Node(Base):
     children_rect_pad = 6  # So there's some area to click inside of
     boundary_proximity_distance = 4
     selection_shape_pad = 3   
-    position_changed = pyqtSignal(QPointF)   # Sends delta
     
     default_border_pen = Pen(Qt.blue, 3.0)
     default_fill_brush = QBrush(SimpleBrush(QColor(255, 255, 0, 150)))
@@ -118,7 +117,7 @@ class Node(Base):
         #super().mouseMoveEvent(event)
         
     def mouseReleaseEvent(self, event):
-        self._clearCollisionMemos()
+        self._clearCollisionMemos()    
         super().mouseReleaseEvent(event)
     
     def handle_collisions(self, delta_pos: QPointF):
@@ -146,16 +145,21 @@ class Node(Base):
         parent = self.parentItem()
         if parent is not None and isinstance(parent, Node):
             parent._clearCollisionMemos()
-    
+            
     def itemChange(self, change, value):
         if change == self.ItemPositionChange:
             self._lastPos = self.pos()
+            delta = value - self.pos()
+            self.position_changing.emit(delta)
             
             if self.scene():
-                self.handle_collisions(delta_pos=value - self.pos())
+                self.handle_collisions(delta_pos=delta)
             
         if change == self.ItemPositionHasChanged:
-            self._clearCollisionMemos()            
+            self._clearCollisionMemos()
+            delta = value - self._lastPos
+            self.position_changed.emit(delta)
+            
             #space = self.parent_graph
             ##space.update_connecting_arrows(self, set())                        
             #self.scene().update()
@@ -273,9 +277,11 @@ class Node(Base):
         if arrows:
             space = self.parent_graph()
             space.update_connecting_arrows(self, memo)
-            
-    def setPos(self, pos: QPointF):
-        super().setPos(pos)
-        
+    
+    def delete(self):   
+        self.parent_graph().delete_node(self) 
+        self.deleteLater()
+        if self.scene():
+            self.scene().update()                
         
             

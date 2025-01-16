@@ -164,6 +164,7 @@ class Scene(QGraphicsScene):
                 
                 for item in self._movingItems:
                     item.setPos(item.pos() + delta)
+                    item.mouse_moved.emit(delta)
                     item.update(memo=memo, arrows=True)
                     
                 self.update()
