@@ -73,10 +73,12 @@ class DirectedGraph(Object):
             if label is None:
                 label = self.unused_arrow_variable_label()
             a = self._arrowType.copy()
-            a.set_label(label)
-            self.add_arrow(a)            
-            a.set_source(source)
-            a.set_target(target)
+            a.set_label(label)                       
+            self.add_arrow(a)
+            if source is not None:
+                a.set_source(source)
+            if target is not None:
+                a.set_target(target)            
             return a
     
     def add_node(self, n: Node):

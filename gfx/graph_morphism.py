@@ -18,7 +18,8 @@ class GraphMorphism(Arrow):
         self._codomainArrows = {}
         self._domainControlPoints = {}
         self._codomainControlPoints = {}
-        self._reflectPosChanges = True
+        self._reflectPosChanges = True    # TODO: pickle these
+        self._reflectDeletions = True
         self._imageTaken = False
         
         if not pickled:
@@ -32,9 +33,9 @@ class GraphMorphism(Arrow):
             raise Exception("Both domain and codomain must be set before calling GraphMorphism.take_image().")
         
         D.adding_child.connect(lambda child: self._onChildAddedToDomain(child))
-        D.removing_child.connect(lambda child: self._onChildRemovedFromDomain(child))
-        C.adding_child.connect(lambda child: self._onChildAddedToCodomain(child))
-        C.removing_child.connect(lambda child: self._onChildRemovedFromCodomain(child))
+        D.removing_child.connect(lambda child: self._onChildRemoved(child))
+        #C.adding_child.connect(lambda child: self._onChildAddedToCodomain(child))
+        C.removing_child.connect(lambda child: self._onChildRemoved(child))
         
         for X in D.nodes():
             self._setupNode(X)        
@@ -65,8 +66,11 @@ class GraphMorphism(Arrow):
             FA.setPos(A.pos())
             FA.label_item().setPos(A.label_item().pos())
             FA.set_label(A.label())
-            FA.set_source(self._codomainNodes[self._imageMap[id(A.source())]])
-            FA.set_target(self._codomainNodes[self._imageMap[id(A.target())]])                
+            #FA.set_source(self._codomainNodes[self._imageMap[id(A.source())]])
+            #FA.set_target(self._codomainNodes[self._imageMap[id(A.target())]])
+            # BUGFIX: ^^ above causes exception; do it this way:
+            A.source_was_set.connect(lambda source: self._reflectArrowSource(source, FA))
+            A.target_was_set.connect(lambda target: self._reflectArrowTarget(target, FA))
             self._codomainArrows[id(FA)] = FA
             self._imageMap[id(A)] = id(FA)
             A.mouse_moved.connect(lambda delta, item=A: self._onItemPositionChanged(item, delta))
@@ -84,7 +88,21 @@ class GraphMorphism(Arrow):
                                 lambda delta, point=point: self._onItemPositionChanged(point, delta))
                     point1.mouse_moved.connect(
                                 lambda delta, point1=point1: self._onItemPositionChanged(point1, delta))                  
-            FA.update()        
+            FA.update()
+            
+    def _reflectArrowSource(self, source: Node, A: Arrow):
+        if source:
+            A.set_source(self._codomainNodes[self._imageMap[id(source)]])
+        else:
+            A.set_source(None)
+        A.update()
+    
+    def _reflectArrowTarget(self, target: Node, A: Arrow):
+        if target:
+            A.set_target(self._codomainNodes[self._imageMap[id(target)]])
+        else:
+            A.set_target(None)
+        A.update()
                
     def copy(self):
         f = GraphMorphism(label=self.label(), domain=self.dom(), codomain=self.cod())
@@ -112,6 +130,12 @@ class GraphMorphism(Arrow):
     def set_reflect_pos_changes(self, reflect: bool):
         self._reflectPosChanges = reflect
         
+    def reflect_deletions(self):
+        return self._reflectDeletions
+    
+    def set_reflect_deletions(self, reflect: bool):
+        self._reflectDeletions = reflect
+        
     def _onBezierToggled(self, arrow: Arrow, toggled: bool, memo:set = None):
         if memo is None:
             memo = set()            
@@ -119,7 +143,7 @@ class GraphMorphism(Arrow):
             memo.add(id(arrow))
             arrow_parent = arrow.parent_graph()
             parent = self.parent_graph()
-            for F in parent.arrows_from(arrow_parent) + parent.arrows_to(arrow_parent):
+            for F in parent.arrows_from(arrow_parent):
                 if isinstance(F, GraphMorphism):
                     if F.reflect_pos_changes():
                         reflect = None
@@ -132,30 +156,17 @@ class GraphMorphism(Arrow):
                             self._onBezierToggled(reflect, toggled, memo)
         
     def _onItemPositionChanged(self, item, delta:QPointF, memo: set = None):
+        print("_onItemPositionChanged: ", item, delta, memo)
         if memo is None:
             memo = set()        
         if id(item) not in memo:
             memo.add(id(item))
             item_parent = item.parent_graph()
             parent = self.parent_graph()
-            for F in parent.arrows_from(item_parent) + parent.arrows_to(item_parent):
+            for F in parent.arrows_from(item_parent):
                 if isinstance(F, GraphMorphism):
                     if F.reflect_pos_changes():                            
-                        reflect = None
-                        if id(item) in F._imageMap:
-                            if isinstance(item, Node):
-                                reflect = F._codomainNodes[F._imageMap[id(item)]]    
-                            elif isinstance(item, Arrow):
-                                reflect = F._codomainArrows[F._imageMap[id(item)]]
-                            elif isinstance(item, ControlPoint):
-                                reflect = F._codomainControlPoints[F._imageMap[id(item)]]
-                        elif id(item) in F._imageMap.inv:
-                            if isinstance(item, Node):
-                                reflect = F._domainNodes[F._imageMap.inv[id(item)]]
-                            elif isinstance(item, Arrow):
-                                reflect = F._domainArrows[F._imageMap.inv[id(item)]]                    
-                            elif isinstance(item, ControlPoint):
-                                reflect = F._domainControlPoints[F._imageMap.inv[id(item)]]
+                        reflect = self._getReflection(item, F)
                         if reflect and id(reflect) not in memo:
                             reflect.setPos(reflect.pos() + delta)
                             reflect.update()
@@ -167,21 +178,51 @@ class GraphMorphism(Arrow):
             return F.replace(".", label)
         return F + label
                         
-    def _onChildAddedToDomain(self, child: Base):
+    def _onChildAddedToDomain(self, child: Base, memo: set = None):
+        #if memo is None:
+            #memo = set()
+        #if id(child) not in memo:
+            #memo.add(id(child))            
         if isinstance(child, Node):
             self._setupNode(child)
         elif isinstance(child, Arrow):
             self._setupArrow(child)
             
-    def _onChildRemovedFromDomain(self, child: Base, memo: set = None):
+    def _onChildRemoved(self, child: Base, memo: set = None):
         if memo is None:
             memo = set()
         if id(child) not in memo:
             memo.add(id(child))
             item_parent = child.parent_graph()
             parent = self.parent_graph()            
-            for F in parent.arrows_from(item_parent) + parent.arrows_to(item_parent):
+            for F in parent.arrows_from(item_parent):
                 if isinstance(F, GraphMorphism):
-                    
-            if isinstance(child, Node):
+                    if F.reflect_deletions():
+                        reflect = self._getReflection(child, F)
+                        if reflect and id(reflect) not in memo:
+                            reflect.delete()
+                            self._onChildRemoved(reflect, memo)
+                            
+    def _getReflection(self, item: Base, F) -> Base:
+        reflect = None
+        try:                
+            if id(item) in F._imageMap:
+                item_id = F._imageMap[id(item)]
+                if isinstance(item, Node):
+                    reflect = F._codomainNodes[item_id]
+                elif isinstance(item, Arrow):
+                    reflect = F._codomainArrows[item_id]
+                elif isinstance(item, ControlPoint):
+                    reflect = F._codomainControlPoints[item_id]            
+            elif id(item) in F._imageMap.inv:
+                item_id = F._imageMap.inv[id(item)]
+                if isinstance(item, Node):
+                    reflect = F._domainNodes[item_id]
+                elif isinstance(item, Arrow):
+                    reflect = F._codomainArrows[item_id]
+                elif isinstance(item, ControlPoint):
+                    reflect = F._domainControlPoints[item_id] 
+        except:
+            pass
+        return reflect        
                         

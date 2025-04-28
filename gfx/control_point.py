@@ -71,7 +71,7 @@ class ControlPoint(Base):
         A = closest_point_on_path(self.pos(), self.mapFromItem(item, shape))
         v = QVector2D(A - self.pos())
         v.normalize()
-        return self.pos() + self.radius * v.toPointF()
+        return self.pos() + self.radius() * v.toPointF()
         
     def paint(self, painter, option, widget):
         painter.setRenderHint(painter.Antialiasing)

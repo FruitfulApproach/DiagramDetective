@@ -11,19 +11,22 @@ proj.directory-list = [{'dirloc': loc('gfx'),
                         'recursive': True,
                         'watch_for_changes': True},
                        {'dirloc': loc('.'),
-                        'excludes': ['math/main.py'],
+                        'excludes': ['math/main.py',
+                                     '.vs'],
                         'filter': '*',
                         'include_hidden': False,
                         'recursive': True,
                         'watch_for_changes': True}]
-proj.file-list = [loc('../Code/__Backup/AbstractSpacecraft/BananaCats/BananaCats/BananaCats/AutoPyToEXESetup.json'),
-                  loc('gfx/base.py'),
+proj.file-list = [loc('gfx/base.py'),
                   loc('main.py')]
 proj.file-type = 'shared'
 proj.launch-config = {loc('main.py'): ('project',
                                        ('',
         'launch-8CBqACP6z2yRuzEt')),
                       loc('mathlib/main.py'): ('project',
+        ('',
+         'launch-8CBqACP6z2yRuzEt')),
+                      loc('prime_gaps.py'): ('project',
         ('',
          'launch-8CBqACP6z2yRuzEt'))}
 proj.main-file = loc('main.py')

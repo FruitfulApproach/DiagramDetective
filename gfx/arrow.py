@@ -11,6 +11,8 @@ from core.utility import min_bounding_rect
 
 class Arrow(Base):
     bezier_toggled = pyqtSignal(bool)
+    source_was_set = pyqtSignal(Node)
+    target_was_set = pyqtSignal(Node)
     
     default_relative_head_size = 5.0
     intersect_shape_width_multiple = 5.0
@@ -96,6 +98,9 @@ class Arrow(Base):
         
         if source is not None:
             self.setZValue(source.zValue() - 1)
+            
+        self.source_was_set.emit(source)
+        
                        
     def set_target(self, target: Node):
         from gfx.directed_graph import DirectedGraph
@@ -108,7 +113,9 @@ class Arrow(Base):
             space.arrow_target_was_set(self, prev_node)
             
         if target is not None:
-            self.setZValue(target.zValue() - 1)            
+            self.setZValue(target.zValue() - 1)
+            
+        self.target_was_set.emit(target)
                     
     def boundingRect(self):
         h = self.head_size() / 2 + self._intersectShapeWidth() / 2
