@@ -1,6 +1,11 @@
 from PyQt6.QtGui import QColor, QVector2D, QPainterPath
 from PyQt6.QtCore import QPointF, QRectF
 import sys
+import ctypes
+
+def set_app_id(appid):         # BUGFIX: to show taskbar icon on Windows (in non-exe mode)
+    # Needs to be a unicode string
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)   
 
 def simple_max_contrasting_color(color):
     return QColor(
