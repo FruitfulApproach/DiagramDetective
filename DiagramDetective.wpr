@@ -4,6 +4,24 @@
 # Wing project file                                              #
 ##################################################################
 [project attributes]
+console.toolbox = [{'autosave': False,
+                    'cmd': 'pyqt6rc ui',
+                    'context': ('project',
+                                None),
+                    'env': ('project',
+                            ['']),
+                    'id': 'cmd-OA6gydsuOa8Gdf0E',
+                    'io_encoding': None,
+                    'key_binding': '',
+                    'line_mode': True,
+                    'pseudo_tty': False,
+                    'pypath': ('project',
+                               []),
+                    'raise_panel': True,
+                    'rundir': ('project',
+                               ''),
+                    'shared': False,
+                    'title': '*.ui,*.qrc to Python'}]
 proj.directory-list = [{'dirloc': loc('gfx'),
                         'excludes': (),
                         'filter': '*',
@@ -17,16 +35,19 @@ proj.directory-list = [{'dirloc': loc('gfx'),
                         'include_hidden': False,
                         'recursive': True,
                         'watch_for_changes': True}]
-proj.file-list = [loc('gfx/base.py'),
-                  loc('main.py')]
+proj.file-list = [loc('DiagramDetective.py'),
+                  loc('gfx/base.py')]
 proj.file-type = 'shared'
-proj.launch-config = {loc('main.py'): ('project',
-                                       ('',
-        'launch-8CBqACP6z2yRuzEt')),
+proj.launch-config = {loc('DiagramDetective.py'): ('project',
+        ('',
+         'launch-8CBqACP6z2yRuzEt')),
+                      loc('devtools/get_appid.py'): ('project',
+        ('',
+         'launch-8CBqACP6z2yRuzEt')),
                       loc('mathlib/main.py'): ('project',
         ('',
          'launch-8CBqACP6z2yRuzEt')),
                       loc('prime_gaps.py'): ('project',
         ('',
          'launch-8CBqACP6z2yRuzEt'))}
-proj.main-file = loc('main.py')
+proj.main-file = loc('DiagramDetective.py')
