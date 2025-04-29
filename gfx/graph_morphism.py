@@ -1,9 +1,9 @@
 from gfx.arrow import Arrow
 from gfx.directed_graph import DirectedGraph
-from PyQt5.QtWidgets import QMenu
+from PyQt6.QtWidgets import QMenu
 from bidict import bidict
 from gfx.node import Node
-from PyQt5.QtCore import QPointF
+from PyQt6.QtCore import QPointF
 from gfx.control_point import ControlPoint
 from gfx.base import Base
 

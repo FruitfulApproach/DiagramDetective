@@ -1,15 +1,15 @@
-from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene
-from PyQt5.QtCore import Qt, QRectF
+from PyQt6.QtWidgets import QGraphicsView, QGraphicsScene
+from PyQt6.QtCore import Qt, QRectF
 
 class View(QGraphicsView):
     def __init__(self, pickled=False):
         super().__init__()
         self._scale = (1.0, 1.0)                    
         #self.setDragMode(QGraphicsView.ScrollHandDrag)
-        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setMouseTracking(True)
-        self.setRubberBandSelectionMode(Qt.ContainsItemShape)
-        self.setDragMode(self.RubberBandDrag)
+        self.setRubberBandSelectionMode(Qt.ItemSelectionMode.ContainsItemShape)
+        self.setDragMode(self.DragMode.RubberBandDrag)
         
         if not pickled:
             self._wheelZoom = True
@@ -68,11 +68,11 @@ class View(QGraphicsView):
         super().wheelEvent(event)    
     
     def keyPressEvent(self, event):
-        if event.modifiers() & Qt.ControlModifier:
-            if event.key() == Qt.Key_Equal:
+        if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            if event.key() == Qt.Key.Key_Equal:
                 self.zoom_in()
                 
-            elif event.key() == Qt.Key_Minus:
+            elif event.key() == Qt.Key.Key_Minus:
                 self.zoom_out()
         super().keyPressEvent(event)
 

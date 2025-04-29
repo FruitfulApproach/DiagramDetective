@@ -1,23 +1,23 @@
-from PyQt5.QtCore import Qt, QPointF, pyqtSignal, QRectF
-from PyQt5.QtGui import QColor, QVector2D, QPen, QBrush
+from PyQt6.QtCore import Qt, QPointF, pyqtSignal, QRectF
+from PyQt6.QtGui import QColor, QVector2D, QPen, QBrush
 from gfx.base import Base
 from core.qt_pickle_utility import SimpleBrush, Pen
 from core.utility import closest_point_on_path
-from PyQt5.QtWidgets import QGraphicsObject
+from PyQt6.QtWidgets import QGraphicsObject
 
 class ControlPoint(Base):
     mouse_moved = pyqtSignal(QPointF)
     
-    default_fill_brush = SimpleBrush(Qt.cyan)
-    default_border_pen = Pen(QColor(Qt.blue), 1.0)
+    default_fill_brush = SimpleBrush(Qt.GlobalColor.cyan)
+    default_border_pen = Pen(QColor(Qt.GlobalColor.blue), 1.0)
     default_radius = 7.5
     
     def __init__(self, pickled=False):
         super().__init__(None, pickled)
-        self.setFlag(self.ItemIsMovable, True)  # BUGFIX: don't wipe out other flags
-        self.setFlag(self.ItemIsFocusable, True)
-        self.setFlag(self.ItemSendsScenePositionChanges, True)
-        self.setFlag(self.ItemSendsGeometryChanges, True)        
+        self.setFlag(self.GraphicsItemFlag.ItemIsMovable, True)  # BUGFIX: don't wipe out other flags
+        self.setFlag(self.GraphicsItemFlag.ItemIsFocusable, True)
+        self.setFlag(self.GraphicsItemFlag.ItemSendsScenePositionChanges, True)
+        self.setFlag(self.GraphicsItemFlag.ItemSendsGeometryChanges, True)        
         
         if not pickled:
             self._rect = QRectF()
@@ -74,7 +74,7 @@ class ControlPoint(Base):
         return self.pos() + self.radius() * v.toPointF()
         
     def paint(self, painter, option, widget):
-        painter.setRenderHint(painter.Antialiasing)
+        painter.setRenderHint(painter.RenderHint.Antialiasing)
         painter.setPen(self.border_pen())
         painter.setBrush(self.fill_brush())
         painter.drawEllipse(self.rect())
@@ -121,4 +121,5 @@ class ControlPoint(Base):
     def parent_graph(self):
         return self.parentItem().parent_graph()
             
+        
          

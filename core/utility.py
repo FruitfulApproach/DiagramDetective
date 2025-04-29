@@ -1,5 +1,5 @@
-from PyQt5.QtGui import QColor, QVector2D, QPainterPath
-from PyQt5.QtCore import QPointF, QRectF
+from PyQt6.QtGui import QColor, QVector2D, QPainterPath
+from PyQt6.QtCore import QPointF, QRectF
 import sys
 
 def simple_max_contrasting_color(color):

@@ -1,5 +1,5 @@
-from PyQt5.QtGui import QBrush, QPen
-from PyQt5.QtCore import Qt
+from PyQt6.QtGui import QBrush, QPen
+from PyQt6.QtCore import Qt
 
 
 class SimpleBrush(QBrush):
@@ -23,31 +23,31 @@ class SimpleBrush(QBrush):
     
 class Pen(QPen):
     styleEnum = {
-        int(Qt.NoPen) : Qt.NoPen,
-        int(Qt.SolidLine) : Qt.SolidLine,
-        int(Qt.DashLine) : Qt.DashLine,
-        int(Qt.DotLine) : Qt.DotLine,
-        int(Qt.DashDotLine) : Qt.DashDotLine,
-        int(Qt.DashDotDotLine) : Qt.DashDotDotLine,
-        int(Qt.CustomDashLine) : Qt.CustomDashLine,
+        int(Qt.PenStyle.NoPen.value) : Qt.PenStyle.NoPen, 
+        int(Qt.PenStyle.SolidLine.value) : Qt.PenStyle.SolidLine,
+        int(Qt.PenStyle.DashLine.value) : Qt.PenStyle.DashLine,
+        int(Qt.PenStyle.DotLine.value) : Qt.PenStyle.DotLine,
+        int(Qt.PenStyle.DashDotLine.value) : Qt.PenStyle.DashDotLine,
+        int(Qt.PenStyle.DashDotDotLine.value) : Qt.PenStyle.DashDotDotLine,
+        int(Qt.PenStyle.CustomDashLine.value) : Qt.PenStyle.CustomDashLine,
     }
 
     capEnum = {
-        int(Qt.FlatCap) : Qt.FlatCap,
-        int(Qt.SquareCap) : Qt.SquareCap,
-        int(Qt.RoundCap) : Qt.RoundCap,
+        int(Qt.PenCapStyle.FlatCap.value) : Qt.PenCapStyle.FlatCap,
+        int(Qt.PenCapStyle.SquareCap.value) : Qt.PenCapStyle.SquareCap,
+        int(Qt.PenCapStyle.RoundCap.value) : Qt.PenCapStyle.RoundCap,
     }
 
     joinEnum = {
-        int(Qt.MiterJoin) : Qt.MiterJoin,
-        int(Qt.BevelJoin) : Qt.BevelJoin,
-        int(Qt.RoundJoin) : Qt.RoundJoin,
-        int(Qt.SvgMiterJoin) : Qt.SvgMiterJoin,
+        int(Qt.PenJoinStyle.MiterJoin.value) : Qt.PenJoinStyle.MiterJoin,
+        int(Qt.PenJoinStyle.BevelJoin.value) : Qt.PenJoinStyle.BevelJoin,
+        int(Qt.PenJoinStyle.RoundJoin.value) : Qt.PenJoinStyle.RoundJoin,
+        int(Qt.PenJoinStyle.SvgMiterJoin.value) : Qt.PenJoinStyle.SvgMiterJoin,
     }
 
-    def __init__(self, color=None, width=None, style=Qt.SolidLine, cap=Qt.RoundCap, join=Qt.RoundJoin):
-        if color is None or color == Qt.NoPen:
-            super().__init__(Qt.NoPen)
+    def __init__(self, color=None, width=None, style=Qt.PenStyle.SolidLine, cap=Qt.PenCapStyle.RoundCap, join=Qt.PenJoinStyle.RoundJoin):
+        if color is None or color == Qt.PenStyle.NoPen:
+            super().__init__(Qt.PenStyle.NoPen)
         else:
             super().__init__(color, width, style, cap, join)
 

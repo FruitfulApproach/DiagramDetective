@@ -1,5 +1,6 @@
-from PyQt5.QtGui import QBrush
-from PyQt5.QtCore import Qt
+from PyQt6.QtGui import QBrush
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QMenu
 from gfx.arrow import Arrow
 from gfx.node import Node
 from mathlib.object import Object
@@ -177,9 +178,9 @@ class DirectedGraph(Object):
         return X            
         
     def itemChange(self, change, value):
-        if change == self.ItemChildAddedChange:
+        if change == self.GraphicsItemChange.ItemChildAddedChange:
             self.adding_child.emit(value)
-        elif change == self.ItemChildRemovedChange:
+        elif change == self.GraphicsItemChange.ItemChildRemovedChange:
             self.removing_child.emit(value)
         return super().itemChange(change, value)
         
@@ -203,3 +204,17 @@ class DirectedGraph(Object):
             
         #return component
         
+    def _buildContextMenu(self, event):
+        menu = QMenu()
+        menu.addAction("Edit text").triggered.connect(lambda b: self.label_item().start_editing_text(event.pos()))         
+        menu.addAction("Add nested node").triggered.connect(lambda b: self._addNestedNode(event.scenePos()))              
+        return menu
+    
+    def _addNestedNode(self, scene_pos):
+        S = self
+        pos = S.mapFromScene(scene_pos)
+        X = S()
+        X.set_center_pos(pos)
+        X.update()
+        if self.scene():
+            self.scene().update()             

@@ -1,11 +1,11 @@
 from gfx.base import Base
 from gfx.node import Node
 from copy import deepcopy
-from PyQt5.QtCore import QPointF, QLineF, Qt, QRectF, QTimer, pyqtSignal
-from PyQt5.QtGui import QPainterPath, QVector2D, QPainterPathStroker
+from PyQt6.QtCore import QPointF, QLineF, Qt, QRectF, QTimer, pyqtSignal
+from PyQt6.QtGui import QPainterPath, QVector2D, QPainterPathStroker
 from gfx.control_point import ControlPoint
 from core.qt_pickle_utility import Pen
-from PyQt5.QtWidgets import QMenu
+from PyQt6.QtWidgets import QMenu
 from gfx.label import Label
 from core.utility import min_bounding_rect
 
@@ -34,12 +34,12 @@ class Arrow(Base):
         self._pointVisTimer = None
         
         if self.label_item():                
-            self.label_item().setFlags(self.label_item().flags() | self.ItemIsMovable)
-        self.setFlags(self.ItemIsSelectable | self.ItemIsFocusable)
+            self.label_item().setFlags(self.label_item().flags() | self.GraphicsItemFlag.ItemIsMovable)
+        self.setFlags(self.GraphicsItemFlag.ItemIsSelectable | self.GraphicsItemFlag.ItemIsFocusable)
         self.setAcceptHoverEvents(True)
         
         if not pickled:
-            self._linePen = Pen(Qt.black, 3.0)
+            self._linePen = Pen(Qt.GlobalColor.black, 3.0)
             self._bezier = False
             self._relativeHeadSize = self.default_relative_head_size
             self._points = [ControlPoint() for i in range(0, 4)]
@@ -260,7 +260,7 @@ class Arrow(Base):
         self.update()
         
     def paint(self, painter, option, widget):
-        painter.setRenderHint(painter.Antialiasing)
+        painter.setRenderHint(painter.RenderHint.Antialiasing)
         #painter.drawRect(self.boundingRect())
         painter.setPen(self.pen())
         painter.drawPath(self._arrowShape)        
@@ -305,8 +305,8 @@ class Arrow(Base):
         self._linePath = self.compute_line_path()
         self._headPath = self.compute_head_path()
         stroker = QPainterPathStroker()
-        stroker.setCapStyle(Qt.RoundCap)
-        stroker.setJoinStyle(Qt.RoundJoin)
+        stroker.setCapStyle(Qt.PenCapStyle.RoundCap)
+        stroker.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
         stroker.setWidth(self._intersectShapeWidth())
         path.addPath(self._linePath)
         path.addPath(self._headPath)

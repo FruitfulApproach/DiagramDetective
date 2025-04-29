@@ -1,6 +1,6 @@
 from gfx.base import Base
-from PyQt5.QtCore import pyqtSignal, QPointF, QRectF, Qt
-from PyQt5.QtGui import QPen, QBrush, QColor, QPainterPath, QVector2D
+from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, Qt
+from PyQt6.QtGui import QPen, QBrush, QColor, QPainterPath, QVector2D
 from gfx.utility import filter_out_gfx_descendents
 from gfx.connect_button import ConnectButton
 from core.utility import closest_point_on_path
@@ -12,7 +12,7 @@ class Node(Base):
     boundary_proximity_distance = 4
     selection_shape_pad = 3   
     
-    default_border_pen = Pen(Qt.NoPen, 2.0)
+    default_border_pen = Pen(Qt.PenStyle.NoPen, 2.0)
     default_fill_brush = QBrush(SimpleBrush(QColor(100, 100, 100, 100)))
     default_corner_radius = 11.0
         
@@ -25,8 +25,8 @@ class Node(Base):
         self._connectButton.set_visible(False)
         
         self.setFlags(
-            self.ItemSendsScenePositionChanges|self.ItemSendsGeometryChanges|
-            self.ItemIsFocusable|self.ItemIsSelectable
+            self.GraphicsItemFlag.ItemSendsScenePositionChanges|self.GraphicsItemFlag.ItemSendsGeometryChanges|
+            self.GraphicsItemFlag.ItemIsFocusable|self.GraphicsItemFlag.ItemIsSelectable
         )
         
         self.setAcceptHoverEvents(True)                
@@ -98,7 +98,7 @@ class Node(Base):
         return shape
     
     def paint(self, painter, option, widget):
-        painter.setRenderHint(painter.Antialiasing)
+        painter.setRenderHint(painter.RenderHint.Antialiasing)
         painter.setBrush(self.fill_brush())
         painter.setPen(self.border_pen())
         r = self.corner_radius()
@@ -147,7 +147,7 @@ class Node(Base):
             parent._clearCollisionMemos()
             
     def itemChange(self, change, value):
-        if change == self.ItemPositionChange:
+        if change == self.GraphicsItemChange.ItemPositionChange:
             self._lastPos = self.pos()
             delta = value - self.pos()
             self.position_changing.emit(delta)
@@ -155,7 +155,7 @@ class Node(Base):
             if self.scene():
                 self.handle_collisions(delta_pos=delta)
             
-        if change == self.ItemPositionHasChanged:
+        if change == self.GraphicsItemChange.ItemPositionHasChanged:
             self._clearCollisionMemos()
             delta = value - self._lastPos
             self.position_changed.emit(delta)
@@ -193,16 +193,16 @@ class Node(Base):
             self._connectButton.set_visible(False)
         
         if self._connectButton.visible():
-            self.setCursor(Qt.UpArrowCursor)
+            self.setCursor(Qt.CursorShape.UpArrowCursor)
         else:
-            self.setCursor(Qt.ArrowCursor)
+            self.setCursor(Qt.CursorShape.ArrowCursor)
             
         self.update(arrows=False)                         
         super().hoverMoveEvent(event)
         
     def hoverLeaveEvent(self, event):
         self._connectButton.set_visible(False)
-        self.setCursor(Qt.ArrowCursor)
+        self.setCursor(Qt.CursorShape.ArrowCursor)
         self.update(arrows=False)
         super().hoverLeaveEvent(event)
         

@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import QGraphicsScene
+from PyQt6.QtWidgets import QGraphicsScene
 import mathlib.builtins as builtin
-from PyQt5.QtCore import QPointF, Qt, QRectF, QTimer, pyqtSignal
-from PyQt5.QtGui import QTransform, QFont, QBrush, QColor, QPen
+from PyQt6.QtCore import QPointF, Qt, QRectF, QTimer, pyqtSignal
+from PyQt6.QtGui import QTransform, QFont, QBrush, QColor, QPen
 from gfx.directed_graph import DirectedGraph
 from gfx.label import Label
 from gfx.node import Node
@@ -18,7 +18,7 @@ class Scene(QGraphicsScene):
         super().__init__()
         
         # TODO
-        self.setBackgroundBrush(SimpleBrush(Qt.lightGray))
+        self.setBackgroundBrush(SimpleBrush(Qt.GlobalColor.lightGray))
         self._mousePressed = False
         self._placingArrow = None
         self._movingItems = []
@@ -32,18 +32,17 @@ class Scene(QGraphicsScene):
             
     def finish_setup(self):
         self.setFont(QFont("Serif", 23))
-        self.ambient_space().setFlag(self.ambient_space().ItemIsSelectable, False)
+        self.ambient_space().setFlag(self.ambient_space().GraphicsItemFlag.ItemIsSelectable, False)
            
     def ambient_space(self):
         return self._ambientSpace
     
     def drawBackground(self, painter, rect):
         space = self.ambient_space()
-        painter.setRenderHint(painter.Antialiasing)
+        painter.setRenderHint(painter.RenderHint.Antialiasing)
         painter.fillRect(rect, space.fill_brush())
-        painter.setRenderHint(painter.Antialiasing)
         painter.setFont(space.label_item().font())
-        painter.setPen(QPen(Qt.black, 1.0))   # TODO: implement text_color in base; then here grab it from ambient_space
+        painter.setPen(QPen(Qt.GlobalColor.black, 1.0))   # TODO: implement text_color in base; then here grab it from ambient_space
         painter.drawText(QPointF(), space.label())
         
     def mouseDoubleClickEvent(self, event):
@@ -65,17 +64,17 @@ class Scene(QGraphicsScene):
             if isinstance(item, Label):
                 item = item.parentItem()
                 
-            if item.expand_to_scene() is None:
-                item.setup_expand_to_scene()
-                
-            self.expand_to_scene_requested.emit(item.expand_to_scene())
+            expand_scene = item.expand_to_scene()
+            
+            if expand_scene is not None:
+                self.expand_to_scene_requested.emit(expand_scene)
                 
                
     def mousePressEvent(self, event):
         self._mousePressed = True
         item = self.itemAt(event.scenePos(), QTransform())
         
-        if event.button() == Qt.LeftButton:                
+        if event.button() == Qt.MouseButton.LeftButton:                
             if item is None:
                 for item in self.items():    
                     item.setSelected(False)             # BUGFIX: items were not automatically deselected already... o_o

@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QGraphicsObject, QGraphicsItem
+from PyQt6.QtWidgets import QGraphicsObject, QGraphicsItem
 from gfx.label import Label
-from PyQt5.QtCore import QRectF, Qt, pyqtSignal, QPointF
+from PyQt6.QtCore import QRectF, Qt, pyqtSignal, QPointF
 from core.utility import simple_max_contrasting_color
-from PyQt5.QtGui import QPen
+from PyQt6.QtGui import QPen
 from datetime import datetime, timedelta
 
 class Base(QGraphicsObject):
@@ -103,14 +103,14 @@ class Base(QGraphicsObject):
             shape = self._selectionShape()
             bgcolor = self.scene().backgroundBrush().color()
             col = simple_max_contrasting_color(bgcolor)
-            painter.strokePath(shape, QPen(col, 1.0, Qt.DotLine))
+            painter.strokePath(shape, QPen(col, 1.0, Qt.PenStyle.DotLine))
             
     def _selectionShape(self):
         raise NotImplementedError
     
     def contextMenuEvent(self, event):
         menu = self._buildContextMenu(event)
-        menu.exec_(event.screenPos())
+        menu.exec(event.screenPos())
         
     def _buildContextMenu(self, event):
         raise NotImplementedError
@@ -123,7 +123,9 @@ class Base(QGraphicsObject):
         raise NotImplementedError
         
     def expand_to_scene(self):
+        if self._expandToScene is None:
+            self._setupExpandToScene()
         return self._expandToScene
     
-    def setup_expand_to_scene(self):
-        raise NotImplementedError
+    def _setupExpandToScene(self):
+        pass

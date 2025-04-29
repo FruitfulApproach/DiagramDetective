@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt6.QtWidgets import QMainWindow, QApplication
 import sys
 from mathlib.object import Object
 from gfx.view import View
@@ -19,4 +19,4 @@ if __name__ == '__main__':
     scene = Scene()
     view.setScene(scene)    
     window.showMaximized()    
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
