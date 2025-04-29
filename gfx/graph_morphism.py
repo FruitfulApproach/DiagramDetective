@@ -30,17 +30,17 @@ class GraphMorphism(Arrow):
         C = self.cod()
         
         if D is None or C is None:
-            raise Exception("Both domain and codomain must be set before calling GraphMorphism.take_image().")
+            raise Exception("Both domain and codomain must be set before taking image.")
         
+        for X in list(D.nodes()):
+            self._setupNode(X)        
+        for A in list(D.arrows()):
+            self._setupArrow(A)            
+            
         D.adding_child.connect(lambda child: self._onChildAddedToDomain(child))
         D.removing_child.connect(lambda child: self._onChildRemoved(child))
         #C.adding_child.connect(lambda child: self._onChildAddedToCodomain(child))
-        C.removing_child.connect(lambda child: self._onChildRemoved(child))
-        
-        for X in D.nodes():
-            self._setupNode(X)        
-        for A in D.arrows():
-            self._setupArrow(A)
+        C.removing_child.connect(lambda child: self._onChildRemoved(child))            
             
         self._imageTaken = True
         
@@ -156,7 +156,6 @@ class GraphMorphism(Arrow):
                             self._onBezierToggled(reflect, toggled, memo)
         
     def _onItemPositionChanged(self, item, delta:QPointF, memo: set = None):
-        print("_onItemPositionChanged: ", item, delta, memo)
         if memo is None:
             memo = set()        
         if id(item) not in memo:
@@ -179,10 +178,10 @@ class GraphMorphism(Arrow):
         return F + label
                         
     def _onChildAddedToDomain(self, child: Base, memo: set = None):
-        #if memo is None:
-            #memo = set()
-        #if id(child) not in memo:
-            #memo.add(id(child))            
+        if memo is None:
+            memo = set()
+        if id(child) not in memo:
+            memo.add(id(child))            
         if isinstance(child, Node):
             self._setupNode(child)
         elif isinstance(child, Arrow):

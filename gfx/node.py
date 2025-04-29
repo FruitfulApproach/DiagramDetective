@@ -12,8 +12,8 @@ class Node(Base):
     boundary_proximity_distance = 4
     selection_shape_pad = 3   
     
-    default_border_pen = Pen(Qt.blue, 3.0)
-    default_fill_brush = QBrush(SimpleBrush(QColor(255, 255, 0, 150)))
+    default_border_pen = Pen(Qt.NoPen, 2.0)
+    default_fill_brush = QBrush(SimpleBrush(QColor(100, 100, 100, 100)))
     default_corner_radius = 11.0
         
     def __init__(self, label: str=None, pickled=False):

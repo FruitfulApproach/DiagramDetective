@@ -80,5 +80,7 @@ class View(QGraphicsView):
         self.fitInView(self.scene().sceneRect(), Qt.KeepAspectRatio)
         
     def setScene(self, scene):        
-        super().setScene(scene)        
-        self.zoom_to_fit_scene_rect()
+        super().setScene(scene)
+        #scene.setSceneRect()
+        #self.zoom_to_fit_scene_rect()
+        self.zoom_in(times=3)

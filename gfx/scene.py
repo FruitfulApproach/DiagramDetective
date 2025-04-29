@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsScene
 import mathlib.builtins as builtin
-from PyQt5.QtCore import QPointF, Qt, QRectF, QTimer
+from PyQt5.QtCore import QPointF, Qt, QRectF, QTimer, pyqtSignal
 from PyQt5.QtGui import QTransform, QFont, QBrush, QColor, QPen
 from gfx.directed_graph import DirectedGraph
 from gfx.label import Label
@@ -12,6 +12,7 @@ from functools import cmp_to_key
 class Scene(QGraphicsScene):
     scene_rect_pad = 10.0
     resize_scene_rect_time = 3500
+    expand_to_scene_requested = pyqtSignal(QGraphicsScene)
     
     def __init__(self, pickled=False):
         super().__init__()
@@ -25,11 +26,8 @@ class Scene(QGraphicsScene):
         
         if not pickled:
             S = self._ambientSpace = builtin.BigCat
+            S.setVisible(False)
             self.addItem(S)
-            A = S()
-            A.setPos(QPointF(-100, -100))
-            B = S()
-            B.setPos(QPointF(100, 100))
             self.finish_setup()
             
     def finish_setup(self):
@@ -39,17 +37,14 @@ class Scene(QGraphicsScene):
     def ambient_space(self):
         return self._ambientSpace
     
-    #def drawBackground(self, painter, rect):
-        #space = self.ambient_space
-        #r = space.corner_radius
-        #painter.setRenderHint(painter.Antialiasing)
-        #painter.setBrush(space.fill_brush)
-        #painter.setPen(space.border_pen)
-        #painter.drawRoundedRect(self.sceneRect(), r, r)
-        #painter.setRenderHint(painter.Antialiasing)
-        #painter.setFont(self.font())
-        #painter.setPen(QPen(Qt.black, 1.0))   # TODO: implement text_color in base; then here grab it from ambient_space
-        #painter.drawText(QPointF(), self.ambient_space.label())
+    def drawBackground(self, painter, rect):
+        space = self.ambient_space()
+        painter.setRenderHint(painter.Antialiasing)
+        painter.fillRect(rect, space.fill_brush())
+        painter.setRenderHint(painter.Antialiasing)
+        painter.setFont(space.label_item().font())
+        painter.setPen(QPen(Qt.black, 1.0))   # TODO: implement text_color in base; then here grab it from ambient_space
+        painter.drawText(QPointF(), space.label())
         
     def mouseDoubleClickEvent(self, event):
         if self._placingArrow:
@@ -63,28 +58,25 @@ class Scene(QGraphicsScene):
             S = self.ambient_space()
             pos = event.scenePos()
             X = S()
+            X.setParentItem(None)
+            self.addItem(X)
             X.set_center_pos(pos)
         else:
             if isinstance(item, Label):
                 item = item.parentItem()
-
-            if isinstance(item, Node):
-                if isinstance(item, DirectedGraph):
-                    S = item
-                    pos = item.mapFromScene(event.scenePos())
-                    X = S()
-                    X.set_center_pos(pos)
-                    X.update()
-                    self.update()
-                else:
-                    super().mouseDoubleClickEvent(event)
-    
+                
+            if item.expand_to_scene() is None:
+                item.setup_expand_to_scene()
+                
+            self.expand_to_scene_requested.emit(item.expand_to_scene())
+                
+               
     def mousePressEvent(self, event):
         self._mousePressed = True
         item = self.itemAt(event.scenePos(), QTransform())
         
         if event.button() == Qt.LeftButton:                
-            if item is None or item is self.ambient_space():
+            if item is None:
                 for item in self.items():    
                     item.setSelected(False)             # BUGFIX: items were not automatically deselected already... o_o
                 self.update()

@@ -1,13 +1,16 @@
+from PyQt5.QtGui import QBrush
+from PyQt5.QtCore import Qt
 from gfx.arrow import Arrow
 from gfx.node import Node
 from mathlib.object import Object
 from core.unicode_utility import next_ascii_prime_variable
+from core.qt_pickle_utility import SimpleBrush
 from gfx.base import Base
 
 class DirectedGraph(Object):
     node_label_start = 'A'
     arrow_label_start = 'a'
-    
+        
     def __init__(self, label: str = None, node_type: Node = None, arrow_type: Arrow = None, pickled=False):
         self._addingChildMemo = set()
         self._removingChildMemo = set()        

@@ -19,6 +19,7 @@ class Base(QGraphicsObject):
         
         self._posChangingMemo = set()
         self._previousUpdateTime = None
+        self._expandToScene = None
         
         if not pickled:
             if label is not None:
@@ -120,5 +121,9 @@ class Base(QGraphicsObject):
             
     def delete(self):
         raise NotImplementedError
-
-  
+        
+    def expand_to_scene(self):
+        return self._expandToScene
+    
+    def setup_expand_to_scene(self):
+        raise NotImplementedError
