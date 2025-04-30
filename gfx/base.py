@@ -1,9 +1,11 @@
-from PyQt6.QtWidgets import QGraphicsObject, QGraphicsItem
+from PyQt6.QtWidgets import QGraphicsObject, QGraphicsItem, QMenu, QApplication
 from gfx.label import Label
 from PyQt6.QtCore import QRectF, Qt, pyqtSignal, QPointF
 from core.utility import simple_max_contrasting_color
 from PyQt6.QtGui import QPen
 from datetime import datetime, timedelta
+from copy import deepcopy
+from mathlib.property import Property
 
 class Base(QGraphicsObject):
     position_changing = pyqtSignal(QPointF)   # Sends delta
@@ -26,6 +28,7 @@ class Base(QGraphicsObject):
                 self._label = Label(label)
             else:
                 self._label = None
+            self._properties = []
             Base.finish_setup(self)
             
     def __setstate__(self, data):
@@ -36,12 +39,14 @@ class Base(QGraphicsObject):
     def _setstate(self, data):
         # Called by subclass __setstate__'s
         self._label = data['label']
+        self._properties = data['props']
         
     def __getstate__(self):
         return self._getstate({})
         
     def _getstate(self, data: dict):
         data['label'] = self._label
+        data['props'] = self._properties
         return data
         
     def finish_setup(self):
@@ -50,13 +55,19 @@ class Base(QGraphicsObject):
         
     def __deepcopy__(self, memo: dict):
         if id(self) not in memo:
-            n = copy(self)
-            memo[id(self)] = n
+            b = self.copy(self)
+            self._deepcopy_to(b, memo)
+            memo[id(self)] = b
         return memo[id(self)]
     
+    def _deepcopy_to(self, b, memo: dict):
+        b._properties = [None] * len(self._properties)
+        for i, p in enumerate(self._properties):
+            b._properties[i] = deepcopy(p, memo)
+    
     def copy(self):
-        n = Base(label=self.label())
-        return n
+        b = Base(label=self.label())
+        return b
     
     def label(self):
         return self._label.text()
@@ -113,7 +124,19 @@ class Base(QGraphicsObject):
         menu.exec(event.screenPos())
         
     def _buildContextMenu(self, event):
-        raise NotImplementedError
+        label = self.label()
+        menu = QMenu(label)
+        prop_menu = menu.addMenu(f'Add property to {label}')
+        app = QApplication.instance()
+        selected_items: list = self.scene().selectedItems()
+        
+        for prop_cls, prop_txt in app.list_relevant_properties(items=selected_items):
+            prop_menu.addAction(prop_cls.text_function(selected_items)).triggered.connect(
+                lambda b, items=selected_items: self.add_property(prop_cls(subject=tuple(items))))
+        
+            # TODO LEFT OFF HERE: implement this properly, think about how list_relevant_properties has got to work
+            # with tuples of items of certain type at fixed tuple indices or ... (?)
+        return menu
     
     def setPos(self, pos: QPointF):
         if pos != self.pos():        
@@ -129,3 +152,8 @@ class Base(QGraphicsObject):
     
     def _setupExpandToScene(self):
         pass
+    
+    def add_property(self, prop: Property):
+        self._properties.append(prop)
+        prop.setParentItem(self)
+        

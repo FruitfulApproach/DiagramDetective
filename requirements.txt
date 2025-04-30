@@ -1,3 +1,4 @@
 PyQt6
 bidict
 pyqt6rc
+stringcase

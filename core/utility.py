@@ -3,7 +3,7 @@ from PyQt6.QtCore import QPointF, QRectF
 import sys
 import ctypes
 
-def set_app_id(appid):         # BUGFIX: to show taskbar icon on Windows (in non-exe mode)
+def set_appid_on_windows_os(appid):         # BUGFIX: to show taskbar icon on Windows (in non-exe mode)
     # Needs to be a unicode string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)   
 

@@ -263,8 +263,7 @@ class Node(Base):
                         x = r0.left()
                 return QPointF(x, y)
 
-            return closest_point_on_path(self.mapFromItem(item, item.boundingRect().center()), shape)
-        
+            return closest_point_on_path(self.mapFromItem(item, item.boundingRect().center()), shape)        
     
     def shape(self):
         path = QPainterPath()
@@ -284,4 +283,4 @@ class Node(Base):
         if self.scene():
             self.scene().update()                
         
-            
+    

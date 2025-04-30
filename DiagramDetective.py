@@ -5,7 +5,7 @@ from gfx.view import View
 from gfx.scene import Scene
 from mathlib.builtins import initialize_builtins
 from dialog.main_window import MainWindow
-from core.utility import set_app_id
+from core.utility import set_appid_on_windows_os
 
 #def my_exception_hook(exctype, value, traceback):
     #sys.__excepthook__(exctype, value, traceback)  # Print the usual traceback
@@ -14,7 +14,7 @@ from core.utility import set_app_id
 
 if __name__ == '__main__':
     app = QApplication([])
-    set_app_id(u'DiagramDetecive')    
+    set_appid_on_windows_os(u'DiagramDetecive')    
     initialize_builtins()        
     window = MainWindow()
     view = View()

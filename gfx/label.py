@@ -15,8 +15,11 @@ class Label(QGraphicsTextItem):
     
     def __setstate__(self, data):
         self.__init__(pickled=True)
-        self.setPlainText(data['text'])
+        self._setstate(data)
         self.finish_setup()
+        
+    def _setstate(self, data):
+        self.setPlainText(data['text'])
     
     def __getstate__(self):
         return {

@@ -8,6 +8,7 @@ from core.qt_pickle_utility import Pen
 from PyQt6.QtWidgets import QMenu
 from gfx.label import Label
 from core.utility import min_bounding_rect
+from bidict import bidict
 
 class Arrow(Base):
     bezier_toggled = pyqtSignal(bool)
