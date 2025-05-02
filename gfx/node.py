@@ -1,6 +1,7 @@
 from gfx.base import Base
 from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, Qt
-from PyQt6.QtGui import QPen, QBrush, QColor, QPainterPath, QVector2D
+from PyQt6.QtGui import QPen, QBrush, QColor, QPainterPath
+from PyQt6.QtWidgets import QMenu
 from gfx.utility import filter_out_gfx_descendents
 from gfx.connect_button import ConnectButton
 from core.utility import closest_point_on_path
@@ -35,6 +36,7 @@ class Node(Base):
             self._pen = self.default_border_pen
             self._brush = self.default_fill_brush
             self._cornerRadius = self.default_corner_radius
+            self._expandToScene = None
             self.finish_setup()
             
     def __setstate__(self, data):
@@ -283,4 +285,25 @@ class Node(Base):
         if self.scene():
             self.scene().update()                
         
+    def _buildContextMenu(self, event):
+        menu = QMenu()
+        menu.addAction("Edit text").triggered.connect(lambda b: self.label_item().start_editing_text(event.pos()))         
+        menu.addAction("Add nested node").triggered.connect(lambda b: self._addNestedNode(event.scenePos()))
+        #menu.addAction("Expand to scene").triggered.connect(lambda b: self.)
+        return menu
     
+    def _addNestedNode(self, scene_pos):
+        S = self
+        pos = S.mapFromScene(scene_pos)
+        X = S()
+        X.set_center_pos(pos)
+        X.update()
+        if self.scene():
+            self.scene().update()
+            
+    def itemChange(self, change, value):
+        if change == self.GraphicsItemChange.ItemChildAddedChange:
+            self.adding_child.emit(value)
+        elif change == self.GraphicsItemChange.ItemChildRemovedChange:
+            self.removing_child.emit(value)
+        return super().itemChange(change, value)

@@ -21,7 +21,6 @@ class Base(QGraphicsObject):
         
         self._posChangingMemo = set()
         self._previousUpdateTime = None
-        self._expandToScene = None
         
         if not pickled:
             if label is not None:
@@ -98,10 +97,16 @@ class Base(QGraphicsObject):
                 self._update(rect, memo, arrows)
                 
                 ancestor = self.parentItem()
-                while ancestor is not None:
-                    ancestor.update(rect, memo, force, arrows)
-                    ancestor = ancestor.parentItem()
-                    
+                if ancestor is not None:
+                    while ancestor is not None:
+                        ancestor.update(rect, memo, force, arrows)
+                        ancestor = ancestor.parentItem()
+                else:
+                    # TODO
+                    #for item in self.scene().items():
+                        #if isinstan
+                    pass
+                
                 if rect is None:
                     QGraphicsObject.update(self)
                 else:

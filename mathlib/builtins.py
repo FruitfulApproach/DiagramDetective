@@ -8,7 +8,7 @@ from gfx.arrow import Arrow
 
 def initialize_builtins():
     global BigCat
-    BigCat = Semicategory("𝐁𝐢𝐠𝐂𝐚𝐭", objects=DirectedGraph("𝓒", node_type=Node("A"), arrow_type=Arrow("a")), morphisms=GraphMorphism("F"))
+    BigCat = Semicategory("𝐁𝐢𝐠𝐂𝐚𝐭", objects=DirectedGraph("𝓒", node_type=Node("A"), arrow_type=Arrow("a")), morphisms=Arrow("F"))
 
 
 BigCat = None

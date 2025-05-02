@@ -1,10 +1,10 @@
 from PyQt6.QtWidgets import QGraphicsScene
 import mathlib.builtins as builtin
-from PyQt6.QtCore import QPointF, Qt, QRectF, QTimer, pyqtSignal
-from PyQt6.QtGui import QTransform, QFont, QBrush, QColor, QPen
-from gfx.directed_graph import DirectedGraph
+from PyQt6.QtCore import QPointF, Qt, pyqtSignal
+from PyQt6.QtGui import QTransform, QFont, QPen
 from gfx.label import Label
 from gfx.node import Node
+from gfx.arrow import Arrow
 from core.qt_pickle_utility import SimpleBrush
 from gfx.arrow import Arrow
 from functools import cmp_to_key
@@ -63,11 +63,20 @@ class Scene(QGraphicsScene):
         else:
             if isinstance(item, Label):
                 item = item.parentItem()
-                
-            expand_scene = item.expand_to_scene()
             
-            if expand_scene is not None:
-                self.expand_to_scene_requested.emit(expand_scene)
+            pos = item.mapFromScene(event.scenePos())
+            X = item()
+            X.set_center_pos(pos)
+            X.update()
+            self.update()            
+        #else:
+            #if isinstance(item, Label):
+                #item = item.parentItem()
+                
+            #expand_scene = item.expand_to_scene()
+            
+            #if expand_scene is not None:
+                #self.expand_to_scene_requested.emit(expand_scene)
                 
                
     def mousePressEvent(self, event):
@@ -87,15 +96,20 @@ class Scene(QGraphicsScene):
                     if item is not self.ambient_space():                    
                         if len(self.selectedItems()) <= 1 and r.contains(p) and item.in_arrow_connect_mode:
                             X = item
-                            C = item.parentItem()
+                            #C = item.parentItem()
                             
-                            if C is None:
-                                C = self.ambient_space()
-                            
-                            a = C(None, X, None)
+                            #if C is None:
+                                #C = self.ambient_space()
                             pos = event.scenePos()
-                            if a.parentItem() is not None:
-                                pos = a.parentItem().mapFromScene(pos)
+                            a = Arrow(label="a", source=X, target=None)
+                            
+                            if X.parentItem() is None:
+                                self.addItem(a)
+                                
+                            else:
+                                a.setParent(X.parentItem())
+                                pos = X.mapFromScene(pos)
+                               
                             a.setPos(pos)
                             a.center_label()
                             self._placingArrow = a
@@ -210,6 +224,10 @@ class Scene(QGraphicsScene):
         super().mouseReleaseEvent(event)
         
     def arrow_cant_connect_target(self, arrow: Arrow, node: Node) -> bool:
+        #TODO:
+        if arrow.parentItem() is None:
+            return False
+        # END TODO
         space = arrow.parent_graph()
         return space.arrow_cant_connect_target(arrow, node)
         
