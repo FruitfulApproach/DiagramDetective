@@ -18,7 +18,7 @@ if __name__ == '__main__':
     initialize_builtins()        
     window = MainWindow()
     view = View()
-    window.setCentralWidget(view)
+    window.tabs.addTab(view, "Test")
     scene = Scene()
     view.setScene(scene)    
     window.showMaximized()

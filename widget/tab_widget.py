@@ -34,7 +34,7 @@ class TabWidget(QTabWidget):
         pass
 
     def mouseMoveEvent(self, e):
-        if e.buttons() != Qt.RightButton:
+        if e.buttons() != Qt.MouseButton.RightButton:
             return
 
         globalPos = self.mapToGlobal(e.pos())
@@ -53,11 +53,11 @@ class TabWidget(QTabWidget):
         drag.setMimeData(mimeData)
         drag.setPixmap(pixmap)
 
-        cursor = QCursor(Qt.OpenHandCursor)
+        cursor = QCursor(Qt.CursorShape.OpenHandCursor)
 
         drag.setHotSpot(posInTab)
-        drag.setDragCursor(cursor.pixmap(),Qt.MoveAction)
-        drag.exec_(Qt.MoveAction)
+        drag.setDragCursor(cursor.pixmap(),Qt.DropAction.MoveAction)
+        drag.exec(Qt.DropAction.MoveAction)
 
     def dragEnterEvent(self, e):
         e.accept()

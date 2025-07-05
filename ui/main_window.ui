@@ -17,7 +17,9 @@
    <iconset resource="resources.qrc">
     <normaloff>:/icons/DiagramDetective.ico</normaloff>:/icons/DiagramDetective.ico</iconset>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout"/>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
@@ -27,8 +29,38 @@
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuDefinition_2">
+    <property name="title">
+     <string>Definition</string>
+    </property>
+    <addaction name="actionDefine"/>
+   </widget>
+   <widget class="QMenu" name="menuInvestigation">
+    <property name="title">
+     <string>Case</string>
+    </property>
+    <addaction name="actionNewInvestigation"/>
+   </widget>
+   <widget class="QMenu" name="menuStatement">
+    <property name="title">
+     <string>Statement</string>
+    </property>
+   </widget>
+   <addaction name="menuInvestigation"/>
+   <addaction name="menuDefinition_2"/>
+   <addaction name="menuStatement"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionNewInvestigation">
+   <property name="text">
+    <string>New</string>
+   </property>
+  </action>
+  <action name="actionDefine">
+   <property name="text">
+    <string>Define...</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="resources.qrc"/>
